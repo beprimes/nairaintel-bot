@@ -114,7 +114,7 @@ def footer(draw, sources):
     draw.text((40, H-54), f"Sources: {sources}", font=fFt, fill="#506070")
     draw.text((40, H-35),
               "Posted 08:00 / 13:00 / 19:00 WAT  •  Not financial advice  •  "
-              "Cached data shows last-updated date  •  @NairaIntel",
+              "Cached data shows last-updated date  •  @AzaIndex",
               font=fFt, fill="#405060")
 
 def accent_bar(draw, color):
@@ -124,7 +124,7 @@ def page_header(draw, title, subtitle_tag, accent, post_time):
     draw.rectangle([(0, 0), (W, 5)], fill=accent)
     draw.text((40, 18), title, font=f(LS_B, 34), fill=WHITE)
     draw.text((40, 62), post_time, font=f(LS_R, 17), fill=LGRAY)
-    rt(draw, "@NairaIntel", f(LS_B, 16), W-40, 22, BLUE)
+    rt(draw, "@AzaIndex", f(LS_B, 16), W-40, 22, BLUE)
     rt(draw, subtitle_tag, f(LS_B, 13), W-40, 46, LGRAY)
     draw.line([(40, 94), (W-40, 94)], fill=BORDER, width=1)
 
@@ -261,15 +261,18 @@ def render_image1(data, out_path):
     section_label(draw, CX2+PAD, CY2+PAD, "Arb & Remittance", YELLOW, 13)
     fAb = f(LM_B, 15)
     fAs = f(LS_R, 13)
-    # Line 1: Binance vs Bybit with gap
-    arb_gap = abs(data["bybit"] - data["binance"])
+    # Line 1: Binance vs Bybit with gap — guard None when one exchange fails
+    b_rate   = data.get("binance") or data.get("parallel", 0)
+    by_rate  = data.get("bybit")   or data.get("parallel", 0)
+    arb_gap  = abs(by_rate - b_rate)
     draw.text((CX2+PAD, CY2+36),
-              f"Binance {ngn(data['binance'])}  Bybit {ngn(data['bybit'])}  Gap {ngn(arb_gap)}",
+              f"Binance {ngn(b_rate)}  Bybit {ngn(by_rate)}  Gap {ngn(arb_gap)}",
               font=fAb, fill=WHITE)
     # Line 2: Wise remittance
-    wise_diff = data["parallel"] - data.get("wise", data["parallel"])
+    wise_rate = data.get("wise") or data.get("parallel", 0)
+    wise_diff = data["parallel"] - wise_rate
     draw.text((CX2+PAD, CY2+56),
-              f"Wise rate: {ngn(data.get('wise'))}  •  Premium over Wise: {ngn(wise_diff)}",
+              f"Wise rate: {ngn(wise_rate)}  •  Premium over Wise: {ngn(wise_diff)}",
               font=fAs, fill=YELLOW)
 
     # ── NAIRA STRENGTH SPEEDOMETER ─────────────────────────────────────────
