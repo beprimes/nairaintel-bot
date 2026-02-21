@@ -1,13 +1,11 @@
 {
   "yr_ago_rate": 1490,
-
   "_notes": {
-    "yr_ago_rate": "Feb 2025 USD/NGN parallel market rate — used for salary erosion tracker. Update each Feb.",
-    "petrol_2023_baseline": "Pre-subsidy-removal petrol price May 2023 — used for tank_days_prev calc",
+    "yr_ago_rate": "Feb 2025 USD/NGN parallel market rate \u2014 used for salary erosion tracker. Update each Feb.",
+    "petrol_2023_baseline": "Pre-subsidy-removal petrol price May 2023 \u2014 used for tank_days_prev calc",
     "inflation": "Update manually each month when NBS publishes. Usually mid-month.",
-    "ngx_movers": "Set ngx_movers_available=false — scraper not yet live. Bot shows index only."
+    "ngx_movers": "Set ngx_movers_available=false \u2014 scraper not yet live. Bot shows index only."
   },
-
   "tier2": {
     "ngx_index": 104520,
     "ngx_change": 0.6,
@@ -22,7 +20,6 @@
     "reserves": 34.2,
     "reserves_date": "2026-02-14"
   },
-
   "tier3": {
     "dangote_output": 350,
     "dangote_date": "2026-02-14",
@@ -31,7 +28,6 @@
     "oil_production": 1.42,
     "oil_production_date": "2026-02-10"
   },
-
   "tier4": {
     "inflation": 33.2,
     "inflation_date": "Jan 2026",
@@ -52,18 +48,19 @@
     "avg_income_formal": 420000,
     "avg_income_date": "2025"
   },
-
   "weekly_tracking": {
-    "usd_ngn_week_high": 1368,
+    "usd_ngn_week_high": 1514.0,
     "usd_ngn_week_low": 1340,
-    "btc_week_high": 67200,
+    "btc_week_high": 68266,
     "btc_week_low": 61800,
     "week_start": "2026-02-17"
   },
-
-  "aza_history": [],
-  "aza_dates": [],
-
+  "aza_history": [
+    26
+  ],
+  "aza_dates": [
+    "Feb-21"
+  ],
   "scrape_failures": {
     "ngx_movers": 0,
     "fuel": 0,
@@ -71,5 +68,26 @@
     "inflation": 0,
     "dangote": 0,
     "oil_production": 0
-  }
+  },
+  "prev_kes_ngn": 10.439,
+  "prev_ghs_ngn": 122.772,
+  "prev_zar_ngn": 83.768,
+  "prev_egp_ngn": 28.319,
+  "prev_xof_ngn": 2.417,
+  "last_btc_usd": 68266,
+  "last_eth_usd": 1984.88,
+  "last_bnb_usd": 625.15,
+  "last_parallel": 1514.0,
+  "last_cbn": 1346.36,
+  "last_eur_ngn": 1585.814,
+  "last_gbp_ngn": 1814.741,
+  "last_cny_ngn": 194.681,
+  "last_kes_ngn": 10.439,
+  "last_ghs_ngn": 122.772,
+  "last_zar_ngn": 83.768,
+  "last_egp_ngn": 28.319,
+  "last_xof_ngn": 2.417,
+  "last_gold_usd": null,
+  "last_brent": 75.0,
+  "last_updated": "2026-02-21T17:37:54.575447"
 }
