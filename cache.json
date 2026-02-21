@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-02-21T13:09:07.025980",
+  "last_updated": "2026-02-21T13:59:32.737081",
   "tier2": {
     "ngx_index": 104520,
     "ngx_change": 0.6,
@@ -60,7 +60,7 @@
   "weekly_tracking": {
     "usd_ngn_week_high": 1368,
     "usd_ngn_week_low": 1340,
-    "btc_week_high": 68000,
+    "btc_week_high": 68164,
     "btc_week_low": 61800,
     "week_start": "2026-02-17"
   },
@@ -95,8 +95,8 @@
   "prev_zar_ngn": 83.76770259760458,
   "prev_egp_ngn": 28.319245468752957,
   "prev_xof_ngn": 2.4174906733083974,
-  "last_btc_usd": 68000,
-  "last_eth_usd": 1975.38,
+  "last_btc_usd": 68164,
+  "last_eth_usd": 1975.07,
   "last_parallel": 1357,
   "last_cbn": 1346.3564,
   "last_eur_ngn": 1512.7599999999998,
@@ -107,7 +107,7 @@
   "last_zar_ngn": 83.76770259760458,
   "last_egp_ngn": 28.319245468752957,
   "last_xof_ngn": 2.4174906733083974,
-  "last_bnb_usd": 629.85,
+  "last_bnb_usd": 630.14,
   "last_gold_usd": 2.327e-05,
   "last_brent": 82.4
 }
