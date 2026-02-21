@@ -114,7 +114,7 @@ def footer(draw, sources):
     draw.text((40, H-54), f"Sources: {sources}", font=fFt, fill="#506070")
     draw.text((40, H-35),
               "Posted 08:00 / 13:00 / 19:00 WAT  •  Not financial advice  •  "
-              "Cached data shows last-updated date  •  @NairaIntel",
+              "Cached data shows last-updated date  •  @AzaIndex",
               font=fFt, fill="#405060")
 
 def accent_bar(draw, color):
@@ -124,7 +124,7 @@ def page_header(draw, title, subtitle_tag, accent, post_time):
     draw.rectangle([(0, 0), (W, 5)], fill=accent)
     draw.text((40, 18), title, font=f(LS_B, 34), fill=WHITE)
     draw.text((40, 62), post_time, font=f(LS_R, 17), fill=LGRAY)
-    rt(draw, "@NairaIntel", f(LS_B, 16), W-40, 22, BLUE)
+    rt(draw, "@AzaIndex", f(LS_B, 16), W-40, 22, BLUE)
     rt(draw, subtitle_tag, f(LS_B, 13), W-40, 46, LGRAY)
     draw.line([(40, 94), (W-40, 94)], fill=BORDER, width=1)
 
@@ -773,9 +773,20 @@ def render_image4(data, out_path):
     draw.rounded_rectangle([(bx2, by2), (bx2+bw2, by2+32)], radius=16, fill="#2A0A10", outline=lc, width=2)
     ct(draw, strength, fBadge, CX+CW//2, by2+4, lc)
 
-    # Week change
-    chg_str = f"▼{abs(aza_chg)} pts from last week" if aza_chg < 0 else f"▲{aza_chg} pts from last week"
-    chg_col = GREEN if aza_chg >= 0 else RED
+    # Week change — only show if we have real history
+    hist_len = len(data.get("aza_hist", []))
+    if hist_len <= 1:
+        chg_str = "First reading today"
+        chg_col = LGRAY
+    elif aza_chg < 0:
+        chg_str = f"▼{abs(aza_chg)} pts from last week"
+        chg_col = RED
+    elif aza_chg > 0:
+        chg_str = f"▲{aza_chg} pts from last week"
+        chg_col = GREEN
+    else:
+        chg_str = "Unchanged from last week"
+        chg_col = LGRAY
     ct(draw, chg_str, f(LS_R, 14), CX+CW//2, CY+202, chg_col)
 
     # Speedometer — no text on the arc at all
@@ -805,22 +816,28 @@ def render_image4(data, out_path):
         draw.text((lx + dot_r*2 + 6, ly), label, font=fLeg, fill=LGRAY)
 
     # 7-day sparkline — pushed down to use remaining space
-    hist = data.get("aza_hist", [49])
-    dates = data.get("aza_dates_short", [""])
+    hist  = data.get("aza_hist", [])
+    dates = data.get("aza_dates_short", [])
     sl_top = leg_y_start + 2*26 + 14
     ct(draw, "7-day trend", f(LS_R, 13), CX+CW//2, sl_top, LGRAY)
-    sl_x = CX+PAD+8; sl_y = sl_top+18; sl_w = CW-PAD*2-16; sl_h = 46
-    mn_h = min(hist); mx_h = max(hist); rng_h = max(mx_h-mn_h, 1)
-    bw_s = (sl_w // max(len(hist), 1)) - 4
-    for i, val in enumerate(hist):
-        bh_s = int(((val-mn_h)/rng_h)*(sl_h-10))+10
-        bx_s = sl_x + i*(bw_s+4)
-        by_s = sl_y + sl_h - bh_s
-        cb = RED if val < 25 else (ORANGE if val < 50 else (YELLOW if val < 75 else GREEN))
-        draw.rectangle([(bx_s, by_s), (bx_s+bw_s, sl_y+sl_h)], fill=cb)
-        ct(draw, str(val), f(LM_B, 11), bx_s+bw_s//2, by_s-15, WHITE)
-        if i < len(dates):
-            ct(draw, dates[i], f(LS_R, 9), bx_s+bw_s//2, sl_y+sl_h+4, DGRAY)
+
+    if not hist:
+        # First run — no history yet, show a message
+        ct(draw, "Building history...", f(LS_R, 12), CX+CW//2, sl_top+30, DGRAY)
+        ct(draw, "Updates 3× daily", f(LS_R, 11), CX+CW//2, sl_top+48, DGRAY)
+    else:
+        sl_x = CX+PAD+8; sl_y = sl_top+18; sl_w = CW-PAD*2-16; sl_h = 46
+        mn_h = min(hist); mx_h = max(hist); rng_h = max(mx_h - mn_h, 1)
+        bw_s = max(4, (sl_w // max(len(hist), 1)) - 4)
+        for i, val in enumerate(hist):
+            bh_s = int(((val - mn_h) / rng_h) * (sl_h - 10)) + 10
+            bx_s = sl_x + i * (bw_s + 4)
+            by_s = sl_y + sl_h - bh_s
+            cb = RED if val < 25 else (ORANGE if val < 50 else (YELLOW if val < 75 else GREEN))
+            draw.rectangle([(bx_s, by_s), (bx_s+bw_s, sl_y+sl_h)], fill=cb)
+            ct(draw, str(val), f(LM_B, 11), bx_s+bw_s//2, by_s-15, WHITE)
+            if i < len(dates):
+                ct(draw, dates[i], f(LS_R, 9), bx_s+bw_s//2, sl_y+sl_h+4, DGRAY)
 
     # ── MID: COMPONENT BREAKDOWN ───────────────────────────────────────────
     CX, CY, CW, CH = 418, 104, 388, 290
