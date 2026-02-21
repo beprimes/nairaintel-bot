@@ -1,0 +1,71 @@
+{
+  "last_updated": "2026-02-21T08:00:00",
+
+  "tier2": {
+    "ngx_index": 104520,
+    "ngx_change": 0.6,
+    "ngx_movers": [
+      {"name": "GTCO", "change": 3.2, "direction": "up"},
+      {"name": "Zenith", "change": 2.1, "direction": "up"},
+      {"name": "MTN", "change": -1.4, "direction": "down"}
+    ],
+    "ngx_movers_date": "2026-02-21",
+    "ngx_movers_available": true,
+    "petrol": 897,
+    "diesel": 1450,
+    "lpg_kg": 1200,
+    "kerosene": 950,
+    "fuel_date": "2026-02-21",
+    "reserves": 34.2,
+    "reserves_date": "2026-02-14"
+  },
+
+  "tier3": {
+    "dangote_output": 350,
+    "dangote_date": "2026-02-14",
+    "nnpc_import": 32.4,
+    "nnpc_date": "2026-02-10",
+    "oil_production": 1.42,
+    "oil_production_date": "2026-02-10"
+  },
+
+  "tier4": {
+    "inflation": 33.2,
+    "inflation_date": "Jan 2026",
+    "inflation_source": "NBS",
+    "external_debt": 42.3,
+    "external_debt_date": "Jan 2026",
+    "opec_quota": 1.5,
+    "opec_date": "Feb 2026",
+    "unemployment": 4.3,
+    "unemployment_date": "Q3 2025",
+    "unemployment_note": "NBS 2023 methodology",
+    "poverty_rate": 40.1,
+    "poverty_date": "2024",
+    "poverty_source": "World Bank",
+    "literacy_rate": 62.0,
+    "literacy_date": "2023",
+    "avg_income_formal": 420000,
+    "avg_income_date": "2025"
+  },
+
+  "weekly_tracking": {
+    "usd_ngn_week_high": 1368,
+    "usd_ngn_week_low": 1340,
+    "btc_week_high": 67200,
+    "btc_week_low": 61800,
+    "week_start": "2026-02-17"
+  },
+
+  "aza_history": [52, 55, 51, 48, 50, 49, 49],
+  "aza_dates": ["Feb-15","Feb-16","Feb-17","Feb-18","Feb-19","Feb-20","Feb-21"],
+
+  "scrape_failures": {
+    "ngx_movers": 0,
+    "fuel": 0,
+    "reserves": 0,
+    "inflation": 0,
+    "dangote": 0,
+    "oil_production": 0
+  }
+}
