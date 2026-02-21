@@ -212,11 +212,16 @@ def fetch_wise_rate():
 
 
 def fetch_crypto_prices():
-    """CoinGecko free API — BTC, ETH, BNB, Gold with 24h change"""
+    """
+    CoinGecko free API — BTC, ETH, BNB only.
+    NOTE: Gold is NOT fetched here. CoinGecko's 'gold' ID is a DeFi token
+    worth fractions of a cent, not the commodity. Gold spot price comes
+    from fetch_gold_price() via Stooq xauusd symbol.
+    """
     try:
         url = "https://api.coingecko.com/api/v3/simple/price"
         params = {
-            "ids": "bitcoin,ethereum,binancecoin,gold",
+            "ids": "bitcoin,ethereum,binancecoin",
             "vs_currencies": "usd",
             "include_24hr_change": "true"
         }
@@ -225,10 +230,9 @@ def fetch_crypto_prices():
         data = r.json()
         result = {}
         mapping = [
-            ("bitcoin",     "btc_usd",  "btc_chg",  "btc_usd"),
-            ("ethereum",    "eth_usd",  "eth_chg",  "eth_usd"),
-            ("binancecoin", "bnb_usd",  "bnb_chg",  "bnb_usd"),
-            ("gold",        "gold_usd", "gold_chg", "gold_usd"),
+            ("bitcoin",     "btc_usd", "btc_chg", "btc_usd"),
+            ("ethereum",    "eth_usd", "eth_chg", "eth_usd"),
+            ("binancecoin", "bnb_usd", "bnb_chg", "bnb_usd"),
         ]
         for coin, price_key, chg_key, bounds_key in mapping:
             p = data.get(coin, {}).get("usd")
@@ -237,11 +241,26 @@ def fetch_crypto_prices():
                 result[chg_key]   = data[coin].get("usd_24h_change")
         if result:
             print(f"[INFO] Crypto: BTC ${result.get('btc_usd',0):,}  "
-                  f"ETH ${result.get('eth_usd',0)}  Gold ${result.get('gold_usd',0)}")
+                  f"ETH ${result.get('eth_usd',0):,}  BNB ${result.get('bnb_usd',0)}")
         return result if result else None
     except Exception as e:
         print(f"[WARN] CoinGecko: {e}")
         return None
+
+
+def fetch_gold_price():
+    """
+    Gold spot price (XAU/USD) from Stooq — symbol xauusd.
+    This is the real commodity gold price (~$2,300-3,000/oz).
+    Completely separate from CoinGecko's 'gold' DeFi token.
+    """
+    val, prev = _stooq_latest_and_prev("xauusd")
+    if val and in_bounds(val, "gold_usd"):
+        chg = _pct_chg(val, prev)
+        print(f"[INFO] Gold spot: ${val:,.2f}/oz")
+        return {"gold_usd": round(val, 2), "gold_chg": chg}
+    print(f"[WARN] Gold Stooq xauusd: value {val} rejected or missing")
+    return None
 
 
 def _stooq_latest_and_prev(symbol):
@@ -402,8 +421,55 @@ def fetch_fx_reserves(cache):
 
 
 def fetch_ngx_movers(cache):
-    """NGX top movers — returns None until reliable source confirmed."""
-    return None
+    """
+    NGX top movers — scrape Nairametrics equities page.
+    Looks for gain/loss tables with stock symbol + percentage.
+    Falls back gracefully if page structure changes.
+    """
+    try:
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                                 "AppleWebKit/537.36 (KHTML, like Gecko) "
+                                 "Chrome/120.0.0.0 Safari/537.36"}
+        # Try Nairametrics stock market page first
+        url = "https://nairametrics.com/category/market-data/equities/"
+        r = requests.get(url, headers=headers, timeout=15)
+        text = r.text
+
+        movers = []
+        # Pattern: stock symbol followed by gain/loss percentage near it
+        # Nairametrics typically shows: "GTCO ▲3.45%" or similar
+        pattern = re.findall(
+            r'\b([A-Z]{2,6})\b[^\n<]{0,40}?([+-]?\d{1,3}\.\d{1,2})\s*%',
+            text
+        )
+        seen = set()
+        for sym, chg_str in pattern:
+            if sym in seen or len(sym) < 2: continue
+            # Filter out non-stock symbols (common false positives)
+            if sym in {"NGX","ASI","NSE","CBN","GDP","CPI","USD","NGN",
+                       "ETH","BTC","BNB","IMF","SEC","CAC","FBN","UBA"}:
+                continue
+            try:
+                chg = float(chg_str)
+                if abs(chg) > 15: continue   # reject implausible values
+                movers.append({"name": sym, "change": chg})
+                seen.add(sym)
+                if len(movers) >= 6: break
+            except ValueError:
+                pass
+
+        if len(movers) >= 2:
+            # Sort by absolute change, biggest movers first
+            movers.sort(key=lambda x: abs(x["change"]), reverse=True)
+            top = movers[:3]
+            print(f"[INFO] NGX movers: {[(m['name'], m['change']) for m in top]}")
+            return top
+
+        print("[WARN] NGX movers: could not parse enough valid entries from page")
+        return None
+    except Exception as e:
+        print(f"[WARN] NGX movers scrape: {e}")
+        return None
 
 
 # ─── Aza Index ────────────────────────────────────────────────────────────────
@@ -649,22 +715,31 @@ def fetch_all_data(config):
     data["wise"] = round(wise, 0) if (wise and in_bounds(wise, "cbn")) \
                    else round(data["parallel"] * 0.96, 0)
 
-    # ── Crypto ────────────────────────────────────────────────────────────────
+    # ── Crypto (BTC, ETH, BNB) ────────────────────────────────────────────────
     print("[INFO] Fetching crypto...")
     crypto = fetch_crypto_prices()
     if crypto:
         data.update(crypto)
-        for k in ["btc_usd", "eth_usd", "bnb_usd", "gold_usd"]:
+        for k in ["btc_usd", "eth_usd", "bnb_usd"]:
             if k in crypto: cache[f"last_{k}"] = crypto[k]
     else:
-        data["btc_usd"]  = cache.get("last_btc_usd",  85000)
-        data["btc_chg"]  = None
-        data["eth_usd"]  = cache.get("last_eth_usd",   2100)
-        data["eth_chg"]  = None
-        data["bnb_usd"]  = cache.get("last_bnb_usd",    580)
-        data["bnb_chg"]  = None
-        data["gold_usd"] = cache.get("last_gold_usd",  2900)
+        data["btc_usd"] = cache.get("last_btc_usd", 85000)
+        data["btc_chg"] = None
+        data["eth_usd"] = cache.get("last_eth_usd",  2100)
+        data["eth_chg"] = None
+        data["bnb_usd"] = cache.get("last_bnb_usd",   580)
+        data["bnb_chg"] = None
+
+    # ── Gold spot price (Stooq xauusd — NOT CoinGecko) ────────────────────────
+    print("[INFO] Fetching gold spot price...")
+    gold = fetch_gold_price()
+    if gold:
+        data.update(gold)
+        cache["last_gold_usd"] = gold["gold_usd"]
+    else:
+        data["gold_usd"] = cache.get("last_gold_usd", 2900)
         data["gold_chg"] = None
+        print(f"[INFO] Gold fallback: ${data['gold_usd']:,}/oz from cache")
 
     # ── Oil ───────────────────────────────────────────────────────────────────
     print("[INFO] Fetching oil prices...")
@@ -701,6 +776,18 @@ def fetch_all_data(config):
         base = k.replace("_usd", "")
         data.setdefault(f"{base}_chg", None)
 
+    # ── NGX Top Movers — every run (movers change through trading day) ──────────
+    print("[INFO] Fetching NGX top movers...")
+    movers = fetch_ngx_movers(cache)
+    if movers:
+        cache["tier2"]["ngx_movers"]           = movers
+        cache["tier2"]["ngx_movers_available"] = True
+        cache["tier2"]["ngx_movers_date"]      = today_str()
+        reset_failure(cache, "ngx_movers")
+    else:
+        cache["tier2"]["ngx_movers_available"] = False
+        increment_failure(cache, "ngx_movers")
+
     # ── Tier 2: Daily scrapes (08:00 only) ───────────────────────────────────
     if is_first_run_today:
         print("[INFO] Running Tier 2 daily scrapes...")
@@ -714,15 +801,6 @@ def fetch_all_data(config):
             increment_failure(cache, "fuel")
             if should_alert(cache, "fuel"):
                 alerts.append("ALERT: Fuel price scrape failed 3+ consecutive days")
-
-        movers = fetch_ngx_movers(cache)
-        if movers:
-            cache["tier2"]["ngx_movers"]           = movers
-            cache["tier2"]["ngx_movers_available"] = True
-            cache["tier2"]["ngx_movers_date"]      = today_str()
-            reset_failure(cache, "ngx_movers")
-        else:
-            cache["tier2"]["ngx_movers_available"] = False
 
         reserves = fetch_fx_reserves(cache)
         if reserves:
