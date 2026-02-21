@@ -392,14 +392,23 @@ def render_image2(data, out_path):
         draw.text((CX+PAD, yy+20), f"as of {upd}", font=fD, fill=DGRAY)
 
     # ── FUEL ACCESSIBILITY ─────────────────────────────────────────────────
-    CX2, CY2, CW2, CH2 = 28, TOP+285, 258, 105
+    CX2, CY2, CW2, CH2 = 28, TOP+285, 258, 110
     card(draw, CX2, CY2, CW2, CH2, fill=CARD2)
     section_label(draw, CX2+PAD, CY2+PAD, "Fuel Accessibility", ORANGE, 13)
-    fFa = f(LM_B, 20)
+    fFa = f(LM_B, 18)
     fFas = f(LS_R, 13)
-    draw.text((CX2+PAD, CY2+38), f"{data['litres_per_dollar']:.2f}L per $1", font=fFa, fill=WHITE)
-    draw.text((CX2+PAD, CY2+68), f"Fill 50L tank = {data['tank_days']:.1f} days wages", font=fFas, fill=RED)
-    draw.text((CX2+PAD, CY2+86), f"1 year ago: {data['tank_days_prev']:.1f} days", font=fFas, fill=LGRAY)
+    fFax = f(LS_R, 12)
+    petrol_v  = data.get("petrol", 0) or 0
+    parallel_v = data.get("parallel", 0) or 0
+    lpd       = data.get("litres_per_dollar", 0) or 0
+    # Line 1: Naira price + dollar equivalent side by side
+    draw.text((CX2+PAD, CY2+36), f"₦{petrol_v:,}/L", font=fFa, fill=WHITE)
+    rt(draw, f"= {lpd:.2f}L per $1", f(LS_R, 13), CX2+CW2-PAD, CY2+42, LGRAY)
+    # Line 2: Cost in Naira to fill tank
+    tank_ngn = 50 * petrol_v
+    draw.text((CX2+PAD, CY2+62), f"50L tank = ₦{tank_ngn:,}", font=fFas, fill=ORANGE)
+    # Line 3: Days wages to fill tank
+    draw.text((CX2+PAD, CY2+80), f"= {data.get('tank_days', 0):.1f} days wages  (was {data.get('tank_days_prev', 0):.1f})", font=fFax, fill=RED)
 
     # ── OIL PRICES ─────────────────────────────────────────────────────────
     CX, CY, CW, CH = 298, TOP, 310, 180
