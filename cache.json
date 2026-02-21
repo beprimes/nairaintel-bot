@@ -1,27 +1,19 @@
 {
-  "last_updated": "2026-02-21T13:59:32.737081",
+  "yr_ago_rate": 1490,
+
+  "_notes": {
+    "yr_ago_rate": "Feb 2025 USD/NGN parallel market rate — used for salary erosion tracker. Update each Feb.",
+    "petrol_2023_baseline": "Pre-subsidy-removal petrol price May 2023 — used for tank_days_prev calc",
+    "inflation": "Update manually each month when NBS publishes. Usually mid-month.",
+    "ngx_movers": "Set ngx_movers_available=false — scraper not yet live. Bot shows index only."
+  },
+
   "tier2": {
     "ngx_index": 104520,
     "ngx_change": 0.6,
-    "ngx_movers": [
-      {
-        "name": "GTCO",
-        "change": 3.2,
-        "direction": "up"
-      },
-      {
-        "name": "Zenith",
-        "change": 2.1,
-        "direction": "up"
-      },
-      {
-        "name": "MTN",
-        "change": -1.4,
-        "direction": "down"
-      }
-    ],
-    "ngx_movers_date": "2026-02-21",
-    "ngx_movers_available": true,
+    "ngx_movers": [],
+    "ngx_movers_date": "",
+    "ngx_movers_available": false,
     "petrol": 897,
     "diesel": 1450,
     "lpg_kg": 1200,
@@ -30,6 +22,7 @@
     "reserves": 34.2,
     "reserves_date": "2026-02-14"
   },
+
   "tier3": {
     "dangote_output": 350,
     "dangote_date": "2026-02-14",
@@ -38,10 +31,12 @@
     "oil_production": 1.42,
     "oil_production_date": "2026-02-10"
   },
+
   "tier4": {
     "inflation": 33.2,
     "inflation_date": "Jan 2026",
     "inflation_source": "NBS",
+    "petrol_2023_baseline": 200,
     "external_debt": 42.3,
     "external_debt_date": "Jan 2026",
     "opec_quota": 1.5,
@@ -57,31 +52,18 @@
     "avg_income_formal": 420000,
     "avg_income_date": "2025"
   },
+
   "weekly_tracking": {
     "usd_ngn_week_high": 1368,
     "usd_ngn_week_low": 1340,
-    "btc_week_high": 68164,
+    "btc_week_high": 67200,
     "btc_week_low": 61800,
     "week_start": "2026-02-17"
   },
-  "aza_history": [
-    52,
-    55,
-    51,
-    48,
-    50,
-    49,
-    49
-  ],
-  "aza_dates": [
-    "Feb-15",
-    "Feb-16",
-    "Feb-17",
-    "Feb-18",
-    "Feb-19",
-    "Feb-20",
-    "Feb-21"
-  ],
+
+  "aza_history": [],
+  "aza_dates": [],
+
   "scrape_failures": {
     "ngx_movers": 0,
     "fuel": 0,
@@ -89,25 +71,5 @@
     "inflation": 0,
     "dangote": 0,
     "oil_production": 0
-  },
-  "prev_kes_ngn": 10.439169553607151,
-  "prev_ghs_ngn": 122.77216563471725,
-  "prev_zar_ngn": 83.76770259760458,
-  "prev_egp_ngn": 28.319245468752957,
-  "prev_xof_ngn": 2.4174906733083974,
-  "last_btc_usd": 68164,
-  "last_eth_usd": 1975.07,
-  "last_parallel": 1357,
-  "last_cbn": 1346.3564,
-  "last_eur_ngn": 1512.7599999999998,
-  "last_gbp_ngn": 1814.7410702250975,
-  "last_cny_ngn": 194.68114579868993,
-  "last_kes_ngn": 10.439169553607151,
-  "last_ghs_ngn": 122.77216563471725,
-  "last_zar_ngn": 83.76770259760458,
-  "last_egp_ngn": 28.319245468752957,
-  "last_xof_ngn": 2.4174906733083974,
-  "last_bnb_usd": 630.14,
-  "last_gold_usd": 2.327e-05,
-  "last_brent": 82.4
+  }
 }
