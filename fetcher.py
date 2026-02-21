@@ -30,7 +30,7 @@ BOUNDS = {
     "btc_usd":  (10000, 500000),
     "eth_usd":  (500,   20000),
     "bnb_usd":  (50,    2000),
-    "gold_usd": (1000,  5000),
+    "gold_usd": (1500,  6000),  # Wide range — gold hit $3k+ in 2025
     "brent":    (20,    200),
     "petrol":   (400,   5000),
     "diesel":   (400,   8000),
@@ -250,16 +250,20 @@ def fetch_crypto_prices():
 
 def fetch_gold_price():
     """
-    Gold spot price (XAU/USD) from Stooq — symbol xauusd.
-    This is the real commodity gold price (~$2,300-3,000/oz).
-    Completely separate from CoinGecko's 'gold' DeFi token.
+    Gold spot price (XAU/USD) from Stooq.
+    Tries multiple symbols in order — Stooq symbol availability varies.
+    Bounds: $1,500–$6,000/oz (wide enough for any realistic gold price).
     """
-    val, prev = _stooq_latest_and_prev("xauusd")
-    if val and in_bounds(val, "gold_usd"):
-        chg = _pct_chg(val, prev)
-        print(f"[INFO] Gold spot: ${val:,.2f}/oz")
-        return {"gold_usd": round(val, 2), "gold_chg": chg}
-    print(f"[WARN] Gold Stooq xauusd: value {val} rejected or missing")
+    symbols = ["xauusd", "gc.f", "gold.f"]
+    for sym in symbols:
+        val, prev = _stooq_latest_and_prev(sym)
+        if val and 1500 <= val <= 6000:
+            chg = _pct_chg(val, prev)
+            print(f"[INFO] Gold spot (Stooq {sym}): ${val:,.2f}/oz")
+            return {"gold_usd": round(val, 2), "gold_chg": chg}
+        elif val:
+            print(f"[WARN] Gold Stooq {sym}: value {val} out of range 1500-6000")
+    print("[WARN] Gold: all Stooq symbols failed — using cache fallback")
     return None
 
 
@@ -730,16 +734,18 @@ def fetch_all_data(config):
         data["bnb_usd"] = cache.get("last_bnb_usd",   580)
         data["bnb_chg"] = None
 
-    # ── Gold spot price (Stooq xauusd — NOT CoinGecko) ────────────────────────
+    # ── Gold spot price (Stooq — NOT CoinGecko) ──────────────────────────────
     print("[INFO] Fetching gold spot price...")
     gold = fetch_gold_price()
     if gold:
         data.update(gold)
         cache["last_gold_usd"] = gold["gold_usd"]
     else:
-        data["gold_usd"] = cache.get("last_gold_usd", 2900)
+        # Fallback chain: last cached → hardcoded safe default
+        cached_gold = cache.get("last_gold_usd")
+        data["gold_usd"] = float(cached_gold) if cached_gold else 2900.0
         data["gold_chg"] = None
-        print(f"[INFO] Gold fallback: ${data['gold_usd']:,}/oz from cache")
+        print(f"[INFO] Gold fallback: ${data['gold_usd']:,.2f}/oz from cache")
 
     # ── Oil ───────────────────────────────────────────────────────────────────
     print("[INFO] Fetching oil prices...")
@@ -951,15 +957,18 @@ def fetch_all_data(config):
     data["post_time_short"] = now.strftime("%b %d, %Y")
     data["post_hour"]       = now.strftime("%H:%M WAT")
 
-    # Final log
+    # Final log — all values cast to safe defaults to prevent format crashes
+    def _safe(v, default=0):
+        return v if v is not None else default
     print(f"\n{'='*52}")
-    print(f"  CBN:       ₦{data['cbn']:>10,.0f}")
-    print(f"  Parallel:  ₦{data['parallel']:>10,.0f}  (spread {data['spread_pct']:.1f}%)")
-    print(f"  BTC:       ${data.get('btc_usd',0):>10,}")
-    print(f"  Brent:     ${data.get('brent',0):>10.1f}/bbl")
-    print(f"  Inflation: {data['inflation']:>10.1f}%")
-    print(f"  Fuel L/$1: {data['litres_per_dollar']:>10.2f}L")
-    print(f"  Aza Index: {data['aza']:>10}/100 — {data['strength_label']}")
+    print(f"  CBN:       ₦{_safe(data.get('cbn')):>10,.0f}")
+    print(f"  Parallel:  ₦{_safe(data.get('parallel')):>10,.0f}  (spread {_safe(data.get('spread_pct')):.1f}%)")
+    print(f"  BTC:       ${_safe(data.get('btc_usd')):>10,.0f}")
+    print(f"  Gold:      ${_safe(data.get('gold_usd')):>10,.2f}/oz")
+    print(f"  Brent:     ${_safe(data.get('brent')):>10.1f}/bbl")
+    print(f"  Inflation: {_safe(data.get('inflation')):>10.1f}%")
+    print(f"  Fuel L/$1: {_safe(data.get('litres_per_dollar')):>10.2f}L")
+    print(f"  Aza Index: {_safe(data.get('aza')):>10}/100 — {data.get('strength_label','?')}")
     print(f"{'='*52}\n")
 
     return data, alerts
