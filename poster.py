@@ -38,8 +38,8 @@ def build_caption(data):
     if hour < 11:
         # Morning — Dollar to Naira focus
         caption = (
-            f"Dollar to Naira — {date_str} | {time_str}\n"
-            f"USD/NGN: ₦{parallel:,.0f} (parallel) • Inflation: {inflation:.1f}%\n"
+            f"Dollar to Naira today — {date_str}\n"
+            f"Parallel: ₦{parallel:,.0f} • Inflation: {inflation:.1f}%\n"
             f"BTC: ₦{btc_usd*parallel/1e6:.2f}M • Brent: ${brent:.1f}/bbl\n"
             f"\n"
             f"{aza_emoji} Aza Index: {aza}/100 — {strength}\n"
@@ -58,8 +58,8 @@ def build_caption(data):
     else:
         # Evening — NigeriaEconomy focus
         caption = (
-            f"NigeriaEconomy update — {date_str} | {time_str}\n"
-            f"Dollar to Naira: ₦{parallel:,.0f} • Inflation: {inflation:.1f}%\n"
+            f"NigeriaEconomy update — {date_str}\n"
+            f"Parallel rate: ₦{parallel:,.0f} • Inflation: {inflation:.1f}%\n"
             f"NGX: {ngx:,} {ngx_arrow}{abs(ngx_chg):.1f}% • Brent: ${brent:.1f}/bbl\n"
             f"\n"
             f"{aza_emoji} Aza Index: {aza}/100 — {strength}\n"
