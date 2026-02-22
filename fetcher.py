@@ -307,9 +307,16 @@ def fetch_oil_prices():
     Brent crude: Stooq symbol lcoj.f (ICE Brent front month).
     Bonny Light = Brent + $1.70 premium (Nigerian crude, not freely quoted).
     """
-    brent, brent_prev = _stooq_latest_and_prev("lcoj.f")
+    brent, brent_prev = None, None
+    for brent_sym in ["lcoj.f", "lco.f", "brent.f", "cb.f"]:
+        brent, brent_prev = _stooq_latest_and_prev(brent_sym)
+        if brent and in_bounds(brent, "brent"):
+            print(f"[INFO] Brent ({brent_sym}): ${brent}")
+            break
+        else:
+            print(f"[WARN] Brent {brent_sym}: {brent}")
     if not brent or not in_bounds(brent, "brent"):
-        print(f"[WARN] Brent: value {brent} out of bounds or missing")
+        print(f"[WARN] Brent: all symbols failed")
         return None
     return {
         "brent":     round(brent, 2),
@@ -321,54 +328,73 @@ def fetch_oil_prices():
 
 def fetch_global_indices():
     """
-    Stooq symbols (verified):
-    ^spx=S&P500, ^ftse=FTSE100, ^dax=DAX, ^nkx=Nikkei225, dx.f=DXY
+    Stooq symbols with fallbacks.
+    Each key tries multiple symbols in order until one works.
     """
+    # (primary, fallback1, fallback2)
     symbols = {
-        "sp500": "^spx", "ftse": "^ftse",
-        "dax": "^dax", "nikkei": "^nkx", "dxy": "dx.f"
+        "sp500":  ["^spx", "spx.us"],
+        "ftse":   ["^ftse", "ukx.uk", "ftse.uk"],
+        "dax":    ["^dax", "dax.de"],
+        "nikkei": ["^nkx", "^n225", "nik.jp"],
+        "dxy":    ["dx.f", "dxy.f", "usdidx"],
     }
     results = {}
-    for key, sym in symbols.items():
-        val, prev = _stooq_latest_and_prev(sym)
-        if val:
-            results[key]          = round(val, 2)
-            results[f"{key}_chg"] = _pct_chg(val, prev)
+    for key, sym_list in symbols.items():
+        for sym in sym_list:
+            val, prev = _stooq_latest_and_prev(sym)
+            if val:
+                results[key]          = round(val, 2)
+                results[f"{key}_chg"] = _pct_chg(val, prev)
+                print(f"[INFO] {key} ({sym}): {val}")
+                break
         else:
-            print(f"[WARN] Stooq {key} ({sym}): no data")
+            print(f"[WARN] {key}: all symbols failed {sym_list}")
     return results
 
 
 def fetch_african_indices():
     """
-    Stooq: ^jse=JSE All Share (SA), ^egx30=EGX30 (Egypt)
-    NSE Kenya not available on Stooq — uses cached static value.
+    African indices with fallback symbols.
+    JSE = Johannesburg Stock Exchange All Share
+    EGX = Egyptian Exchange EGX30
     """
-    symbols = {"jse": "^jse", "egx": "^egx30"}
+    symbols = {
+        "jse": ["^jse", "jse.za", "^jalsh"],
+        "egx": ["^egx30", "egx30.eg", "^egx"],
+    }
     results = {}
-    for key, sym in symbols.items():
-        val, prev = _stooq_latest_and_prev(sym)
-        if val:
-            results[key]          = round(val, 2)
-            results[f"{key}_chg"] = _pct_chg(val, prev)
+    for key, sym_list in symbols.items():
+        for sym in sym_list:
+            val, prev = _stooq_latest_and_prev(sym)
+            if val:
+                results[key]          = round(val, 2)
+                results[f"{key}_chg"] = _pct_chg(val, prev)
+                print(f"[INFO] {key} ({sym}): {val}")
+                break
         else:
-            print(f"[WARN] Stooq {key} ({sym}): no data")
+            print(f"[WARN] {key}: all symbols failed {sym_list}")
     return results
 
 
 def fetch_commodities():
     """
-    Stooq: xagusd=Silver spot (USD/oz), cc.f=Cocoa futures (USD/ton)
+    Stooq: xagusd=Silver spot (USD/oz)
+    Cocoa: tries multiple symbols (cc.f often unavailable on Stooq)
     """
-    symbols = {"silver": "xagusd", "cocoa": "cc.f"}
+    symbols = {"silver": ["xagusd", "xag.f"], "cocoa": ["cc.f", "cj.f", "cocoa.f"]}
     results = {}
-    for key, sym in symbols.items():
-        val, prev = _stooq_latest_and_prev(sym)
-        if val:
-            results[f"{key}_usd"] = round(val, 2)
-            results[f"{key}_chg"] = _pct_chg(val, prev)
+    for key, sym_list in symbols.items():
+        if isinstance(sym_list, str): sym_list = [sym_list]
+        for sym in sym_list:
+            val, prev = _stooq_latest_and_prev(sym)
+            if val:
+                results[f"{key}_usd"] = round(val, 2)
+                results[f"{key}_chg"] = _pct_chg(val, prev)
+                print(f"[INFO] {key} ({sym}): {val}")
+                break
         else:
-            print(f"[WARN] Stooq {key} ({sym}): no data")
+            print(f"[WARN] {key}: all symbols failed")
     return results
 
 
@@ -426,185 +452,144 @@ def fetch_fx_reserves(cache):
 
 def fetch_ngx_movers(cache):
     """
-    NGX top movers — tries sources in order with full debug logging.
+    NGX top movers — all known sources exhausted in debug run.
+    Root cause: JS-rendered pages return no stock data server-side.
 
-    Source 1: NGX Group JSON API (most reliable — official data)
-    Source 2: Nairametrics equities page (HTML scrape fallback)
-    Source 3: BusinessDay markets page (HTML scrape fallback)
+    Strategy:
+    1. NGX daily equity price list (CSV download — server-side, reliable)
+    2. Investing.com NGX page (renders some data server-side)
+    3. Compute movers ourselves from the NGX price list if CSV works
     """
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                       "AppleWebKit/537.36 (KHTML, like Gecko) "
                       "Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "application/json, text/html, */*",
+        "Accept": "text/html,application/xhtml+xml,*/*",
         "Accept-Language": "en-US,en;q=0.9",
-        "Referer": "https://ngxgroup.com/",
     }
 
-    # Non-ticker false positives to exclude
     EXCLUDE = {
         "NGX","ASI","NSE","CBN","GDP","CPI","USD","NGN","EUR","GBP",
-        "ETH","BTC","BNB","IMF","SEC","CAC","EPS","ROE","ROA",
-        "YOY","QOQ","MOM","CEO","CFO","COO","ESG","IPO","SPO","AGM",
-        "EGM","FY","Q1","Q2","Q3","Q4","H1","H2","AM","PM","WAT",
-        "GMT","NBS","OPEC","NNPC","FIRS","SERAP","NASD","THE","AND",
-        "FOR","ALL","NEW","TOP","HOW","WHY","WHO","MAX","MIN","AVG",
+        "ETH","BTC","BNB","IMF","SEC","CAC","EPS","ROE","ROA","THE",
+        "AND","FOR","ALL","NEW","TOP","HOW","WHY","WHO","MAX","MIN",
+        "YOY","QOQ","MOM","CEO","CFO","COO","ESG","IPO","AGM","FY",
+        "WAT","GMT","NBS","OPEC","NNPC","FIRS","NASD","NGN","NGX",
     }
 
-    # ── Source 1: NGX Group JSON endpoints ───────────────────────────────────
-    ngx_json_urls = [
-        "https://ngxgroup.com/wp-json/ngx/v1/market-statistics",
-        "https://ngxgroup.com/wp-json/ngx/v1/top-gainers",
-        "https://ngxgroup.com/wp-json/ngx/v1/top-losers",
-        "https://api.ngxgroup.com/api/v1/market/topmovers",
+    # ── Source 1: NGX daily price list CSV ───────────────────────────────────
+    # NGX publishes a daily equity price list as a downloadable file
+    csv_urls = [
+        "https://ngxgroup.com/exchange/trade/equities-market/?sidebar=equityprices",
+        "https://ngxgroup.com/wp-content/uploads/equity-price-list.csv",
     ]
-    for url in ngx_json_urls:
+    for url in csv_urls:
         try:
-            r = requests.get(url, headers=headers, timeout=10)
-            print(f"[DEBUG] NGX JSON {url.split('/')[-1]}: status {r.status_code}")
-            if r.status_code == 200:
-                data = r.json()
+            r = requests.get(url, headers=headers, timeout=15)
+            print(f"[DEBUG] NGX CSV {url.split('/')[-1][:40]}: {r.status_code}, {len(r.text)} chars")
+            if r.status_code == 200 and "," in r.text and len(r.text) > 500:
+                lines = r.text.strip().split("\n")
                 movers = []
-                # Try common JSON structures
-                items = (data.get("data") or data.get("results") or
-                         data.get("topGainers") or data.get("items") or
-                         (data if isinstance(data, list) else []))
-                for item in items[:10]:
-                    sym = (item.get("symbol") or item.get("ticker") or
-                           item.get("stockCode") or item.get("Symbol") or "")
-                    chg = (item.get("percentChange") or item.get("pctChange") or
-                           item.get("change") or item.get("PercentChange") or 0)
-                    if sym and chg:
+                for line in lines[1:]:   # skip header
+                    parts = [p.strip().strip('"') for p in line.split(",")]
+                    if len(parts) < 4: continue
+                    sym = parts[0].upper()
+                    if sym in EXCLUDE or not sym.isalpha(): continue
+                    # Try to find a % change column
+                    for p in parts[1:]:
+                        p = p.replace("%","").replace("+","").strip()
                         try:
-                            sym = str(sym).strip().upper()
-                            chg = float(str(chg).replace("%","").replace("+",""))
-                            if sym not in EXCLUDE and abs(chg) <= 15 and abs(chg) >= 0.01:
+                            chg = float(p)
+                            if 0.01 <= abs(chg) <= 15:
                                 movers.append({"name": sym, "change": chg})
+                                break
                         except ValueError:
                             pass
                 if len(movers) >= 2:
                     movers.sort(key=lambda x: abs(x["change"]), reverse=True)
                     top = movers[:3]
-                    print(f"[INFO] NGX movers (JSON): {[(m['name'], m['change']) for m in top]}")
+                    print(f"[INFO] NGX movers (CSV): {[(m['name'],m['change']) for m in top]}")
                     return top
         except Exception as e:
-            print(f"[DEBUG] NGX JSON {url}: {e}")
+            print(f"[DEBUG] NGX CSV: {e}")
 
-    # ── Source 2: NGX CSV/download endpoint ──────────────────────────────────
+    # ── Source 2: Investing.com NGX stocks ────────────────────────────────────
     try:
-        csv_url = "https://ngxgroup.com/exchange/trade/equities-market/"
-        r = requests.get(csv_url, headers=headers, timeout=12)
-        print(f"[DEBUG] NGX equities page: {r.status_code}, {len(r.text)} chars")
-        text = r.text
-
-        # Look for data table rows with ticker + change columns
-        # NGX site typically has: <td>GTCO</td>...<td>+4.10%</td>
-        row_pattern = re.findall(
-            r'<tr[^>]*>.*?<td[^>]*>\s*([A-Z]{2,12})\s*</td>.*?([+-]?\d{1,3}\.\d{2})\s*%.*?</tr>',
-            text, re.DOTALL | re.IGNORECASE
-        )
-        print(f"[DEBUG] NGX equities rows found: {len(row_pattern)}")
-
-        movers = []
-        seen = set()
-        for sym, chg_str in row_pattern[:20]:
-            sym = sym.strip().upper()
-            if sym in seen or sym in EXCLUDE: continue
-            if not sym.isalpha(): continue
-            try:
-                chg = float(chg_str)
-                if abs(chg) > 15 or abs(chg) < 0.01: continue
-                movers.append({"name": sym, "change": chg})
-                seen.add(sym)
-            except ValueError:
-                pass
-        if len(movers) >= 2:
-            movers.sort(key=lambda x: abs(x["change"]), reverse=True)
-            top = movers[:3]
-            print(f"[INFO] NGX movers (NGX equities page): {[(m['name'], m['change']) for m in top]}")
-            return top
-    except Exception as e:
-        print(f"[DEBUG] NGX equities page: {e}")
-
-    # ── Source 3: Nairametrics with better pattern ────────────────────────────
-    try:
-        url = "https://nairametrics.com/category/market-data/equities/"
+        url = "https://www.investing.com/equities/nigeria"
         r = requests.get(url, headers=headers, timeout=15)
-        print(f"[DEBUG] Nairametrics: {r.status_code}, {len(r.text)} chars")
-        text = r.text
+        print(f"[DEBUG] Investing.com: {r.status_code}, {len(r.text)} chars")
+        if r.status_code == 200:
+            text = r.text
+            # Investing.com renders a table: <td class="pid-...">GTCO</td>
+            # with change column containing +4.10%
+            rows = re.findall(
+                r'<tr[^>]*data-row-link[^>]*>.*?</tr>',
+                text, re.DOTALL
+            )
+            print(f"[DEBUG] Investing.com rows: {len(rows)}")
+            movers = []
+            seen = set()
+            for row in rows[:30]:
+                # Extract symbol
+                sym_m = re.search(r'class="[^"]*bold[^"]*"[^>]*>([A-Z]{2,12})</', row)
+                # Extract % change
+                chg_m = re.search(r'([+-]\d{1,3}\.\d{2}%)', row)
+                if sym_m and chg_m:
+                    sym = sym_m.group(1).strip().upper()
+                    pct = chg_m.group(1).replace("%","").replace("+","")
+                    if sym in seen or sym in EXCLUDE: continue
+                    try:
+                        chg = float(pct)
+                        if 0.01 <= abs(chg) <= 15:
+                            movers.append({"name": sym, "change": chg})
+                            seen.add(sym)
+                    except ValueError:
+                        pass
+            if len(movers) >= 2:
+                movers.sort(key=lambda x: abs(x["change"]), reverse=True)
+                top = movers[:3]
+                print(f"[INFO] NGX movers (Investing.com): {[(m['name'],m['change']) for m in top]}")
+                return top
+    except Exception as e:
+        print(f"[DEBUG] Investing.com: {e}")
 
-        # Log a snippet to see what we're actually getting
-        # Find first percentage-looking string and surrounding context
-        sample = re.search(r'.{0,80}\d{1,3}\.\d{2}\s*%.{0,80}', text)
-        if sample:
-            print(f"[DEBUG] Nairametrics sample: {repr(sample.group()[:120])}")
-        else:
-            print("[DEBUG] Nairametrics: no percentage patterns found in page")
-
-        movers = []
-        seen = set()
-        # Multiple patterns — broad to narrow
-        for pat in [
-            r'\b([A-Z]{2,10})\b[^\n<]{0,60}([+-]\d{1,3}\.\d{2})\s*%',
-            r'([+-]\d{1,3}\.\d{2})\s*%[^\n<]{0,60}\b([A-Z]{2,10})\b',
-        ]:
-            for m in re.findall(pat, text):
-                sym, pct = (m[1], m[0]) if m[0][0] in "+-" else (m[0], m[1])
-                sym = sym.strip().upper()
+    # ── Source 3: Nairametrics search for daily market wrap ───────────────────
+    # Market wrap articles list top movers in plain text — more parseable
+    try:
+        url = "https://nairametrics.com/?s=ngx+top+gainers"
+        r = requests.get(url, headers=headers, timeout=15)
+        print(f"[DEBUG] Nairametrics search: {r.status_code}, {len(r.text)} chars")
+        if r.status_code == 200:
+            text = r.text
+            # Look for article snippets mentioning tickers and percentages
+            # e.g. "GTCO led gainers, rising 4.10%"
+            movers = []
+            seen = set()
+            pat = r'\b([A-Z]{2,10})\b[^.\n]{0,80}?(\d{1,3}\.\d{2})\s*(?:per\s*cent|percent|%)'
+            for m in re.findall(pat, text, re.IGNORECASE):
+                sym = m[0].strip().upper()
+                pct_str = m[1]
                 if sym in seen or sym in EXCLUDE: continue
-                if not sym.isalpha() or len(sym) < 2: continue
+                if not sym.isalpha(): continue
+                # Only trust if it looks like a real ticker (3-10 chars)
+                if len(sym) < 3 or len(sym) > 10: continue
                 try:
-                    chg = float(pct)
-                    if abs(chg) > 15 or abs(chg) < 0.01: continue
-                    movers.append({"name": sym, "change": chg})
-                    seen.add(sym)
+                    chg = float(pct_str)
+                    if 0.01 <= abs(chg) <= 15:
+                        movers.append({"name": sym, "change": chg})
+                        seen.add(sym)
                 except ValueError:
                     pass
-
-        print(f"[DEBUG] Nairametrics movers found: {len(movers)}")
-        if len(movers) >= 2:
-            movers.sort(key=lambda x: abs(x["change"]), reverse=True)
-            top = movers[:3]
-            print(f"[INFO] NGX movers (Nairametrics): {[(m['name'], m['change']) for m in top]}")
-            return top
+            print(f"[DEBUG] Nairametrics search movers: {len(movers)}")
+            if len(movers) >= 2:
+                movers.sort(key=lambda x: abs(x["change"]), reverse=True)
+                top = movers[:3]
+                print(f"[INFO] NGX movers (Nairametrics search): "
+                      f"{[(m['name'],m['change']) for m in top]}")
+                return top
     except Exception as e:
-        print(f"[DEBUG] Nairametrics: {e}")
+        print(f"[DEBUG] Nairametrics search: {e}")
 
-    # ── Source 4: BusinessDay ─────────────────────────────────────────────────
-    try:
-        url = "https://businessday.ng/markets/equities/"
-        r = requests.get(url, headers=headers, timeout=15)
-        print(f"[DEBUG] BusinessDay: {r.status_code}, {len(r.text)} chars")
-        text = r.text
-
-        movers = []
-        seen = set()
-        for pat in [
-            r'\b([A-Z]{2,10})\b[^\n<]{0,60}([+-]\d{1,3}\.\d{2})\s*%',
-        ]:
-            for m in re.findall(pat, text):
-                sym, pct = m[0], m[1]
-                sym = sym.strip().upper()
-                if sym in seen or sym in EXCLUDE: continue
-                if not sym.isalpha() or len(sym) < 2: continue
-                try:
-                    chg = float(pct)
-                    if abs(chg) > 15 or abs(chg) < 0.01: continue
-                    movers.append({"name": sym, "change": chg})
-                    seen.add(sym)
-                except ValueError:
-                    pass
-
-        print(f"[DEBUG] BusinessDay movers found: {len(movers)}")
-        if len(movers) >= 2:
-            movers.sort(key=lambda x: abs(x["change"]), reverse=True)
-            top = movers[:3]
-            print(f"[INFO] NGX movers (BusinessDay): {[(m['name'], m['change']) for m in top]}")
-            return top
-    except Exception as e:
-        print(f"[DEBUG] BusinessDay: {e}")
-
-    print("[WARN] NGX movers: all sources exhausted — check DEBUG lines above in logs")
+    print("[WARN] NGX movers: all sources failed — will show index only")
     return None
 
 
