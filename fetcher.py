@@ -426,113 +426,187 @@ def fetch_fx_reserves(cache):
 
 def fetch_ngx_movers(cache):
     """
-    NGX top movers — tries 3 sources in order:
-    1. NGX Group daily market report page
-    2. Nairametrics equities category
-    3. BusinessDay markets page
-    Parses stock ticker + percentage change pairs.
+    NGX top movers — tries sources in order with full debug logging.
+
+    Source 1: NGX Group JSON API (most reliable — official data)
+    Source 2: Nairametrics equities page (HTML scrape fallback)
+    Source 3: BusinessDay markets page (HTML scrape fallback)
     """
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                       "AppleWebKit/537.36 (KHTML, like Gecko) "
                       "Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5",
-    }
-
-    # Known major NGX tickers to validate against (reduces false positives)
-    KNOWN_TICKERS = {
-        "GTCO","ZENITHBANK","MTNN","DANGCEM","AIRTELAFRI","FBNH","UBA",
-        "ACCESSCORP","STANBIC","TRANSCORP","OANDO","SEPLAT","NESTLE",
-        "GUINNESS","NB","PRESCO","FLOURMILL","BUACEMENT","WAPCO","LAFARGE",
-        "FIDELITYBK","FBNH","UCAP","CUSTODIAN","MANSARD","LEARN","CADBURY",
-        "HONYFLOUR","MULTIVERSE","UNIVINSURE","LINKASSURE","CORNERST",
-        "UPDC","CHIPLC","ROYALEX","NNFM","NASCON","INTENEGINS",
-        "UNILEVER","PZ","TOTAL","CONOIL","MRS","ETERNA",
-    }
-    # Short versions also valid
-    SHORT_TICKERS = {
-        "GTCO","MTNN","UBA","FBNH","NB","PZ",
-        "SEPLAT","OANDO","PRESCO","CADBURY",
+        "Accept": "application/json, text/html, */*",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "https://ngxgroup.com/",
     }
 
     # Non-ticker false positives to exclude
     EXCLUDE = {
         "NGX","ASI","NSE","CBN","GDP","CPI","USD","NGN","EUR","GBP",
-        "ETH","BTC","BNB","IMF","SEC","CAC","FBN","EPS","ROE","ROA",
+        "ETH","BTC","BNB","IMF","SEC","CAC","EPS","ROE","ROA",
         "YOY","QOQ","MOM","CEO","CFO","COO","ESG","IPO","SPO","AGM",
         "EGM","FY","Q1","Q2","Q3","Q4","H1","H2","AM","PM","WAT",
-        "GMT","NBS","CBN","OPEC","NNPC","FIRS","SERAP","NASD",
+        "GMT","NBS","OPEC","NNPC","FIRS","SERAP","NASD","THE","AND",
+        "FOR","ALL","NEW","TOP","HOW","WHY","WHO","MAX","MIN","AVG",
     }
 
-    sources = [
-        "https://ngxgroup.com/exchange/trade/market-statistics/",
-        "https://nairametrics.com/category/market-data/equities/",
-        "https://businessday.ng/markets/equities/",
+    # ── Source 1: NGX Group JSON endpoints ───────────────────────────────────
+    ngx_json_urls = [
+        "https://ngxgroup.com/wp-json/ngx/v1/market-statistics",
+        "https://ngxgroup.com/wp-json/ngx/v1/top-gainers",
+        "https://ngxgroup.com/wp-json/ngx/v1/top-losers",
+        "https://api.ngxgroup.com/api/v1/market/topmovers",
     ]
-
-    for url in sources:
+    for url in ngx_json_urls:
         try:
-            r = requests.get(url, headers=headers, timeout=15)
-            if r.status_code != 200:
-                print(f"[WARN] NGX movers: {url} returned {r.status_code}")
-                continue
-            text = r.text
-
-            movers = []
-            seen = set()
-
-            # Pattern 1: TICKER followed closely by a percentage (with or without sign)
-            # e.g. "GTCO  ▲4.10%" or "ZENITHBANK +3.25%" or "MTNN -1.50%"
-            patterns = [
-                r'\b([A-Z]{2,12})\b[^\n<]{0,50}?([+-]\d{1,3}\.\d{1,2})\s*%',
-                r'([+-]\d{1,3}\.\d{1,2})\s*%[^\n<]{0,50}?\b([A-Z]{2,12})\b',
-                r'\b([A-Z]{2,12})\b[^\n<]{0,30}?(\d{1,3}\.\d{2})\s*%',
-            ]
-
-            for pat in patterns:
-                matches = re.findall(pat, text)
-                for m in matches:
-                    # Handle both (TICKER, PCT) and (PCT, TICKER) patterns
-                    if m[0][0] in "+-0123456789":
-                        pct_str, sym = m[0], m[1]
-                    else:
-                        sym, pct_str = m[0], m[1]
-
-                    sym = sym.strip()
-                    if sym in seen or sym in EXCLUDE: continue
-                    if len(sym) < 2 or len(sym) > 12: continue
-                    # Must be all uppercase letters
-                    if not sym.isalpha() or not sym.isupper(): continue
-
-                    try:
-                        chg = float(pct_str)
-                        if abs(chg) > 15: continue  # reject implausible
-                        if abs(chg) < 0.01: continue  # reject zero moves
-                        movers.append({"name": sym, "change": chg})
-                        seen.add(sym)
-                        if len(movers) >= 10: break
-                    except ValueError:
-                        pass
-
-                if len(movers) >= 3:
-                    break
-
-            if len(movers) >= 2:
-                movers.sort(key=lambda x: abs(x["change"]), reverse=True)
-                top = movers[:3]
-                print(f"[INFO] NGX movers from {url.split('/')[2]}: "
-                      f"{[(m['name'], m['change']) for m in top]}")
-                return top
-
-            print(f"[WARN] NGX movers: only {len(movers)} found at {url.split('/')[2]}")
-
+            r = requests.get(url, headers=headers, timeout=10)
+            print(f"[DEBUG] NGX JSON {url.split('/')[-1]}: status {r.status_code}")
+            if r.status_code == 200:
+                data = r.json()
+                movers = []
+                # Try common JSON structures
+                items = (data.get("data") or data.get("results") or
+                         data.get("topGainers") or data.get("items") or
+                         (data if isinstance(data, list) else []))
+                for item in items[:10]:
+                    sym = (item.get("symbol") or item.get("ticker") or
+                           item.get("stockCode") or item.get("Symbol") or "")
+                    chg = (item.get("percentChange") or item.get("pctChange") or
+                           item.get("change") or item.get("PercentChange") or 0)
+                    if sym and chg:
+                        try:
+                            sym = str(sym).strip().upper()
+                            chg = float(str(chg).replace("%","").replace("+",""))
+                            if sym not in EXCLUDE and abs(chg) <= 15 and abs(chg) >= 0.01:
+                                movers.append({"name": sym, "change": chg})
+                        except ValueError:
+                            pass
+                if len(movers) >= 2:
+                    movers.sort(key=lambda x: abs(x["change"]), reverse=True)
+                    top = movers[:3]
+                    print(f"[INFO] NGX movers (JSON): {[(m['name'], m['change']) for m in top]}")
+                    return top
         except Exception as e:
-            print(f"[WARN] NGX movers {url}: {e}")
-            continue
+            print(f"[DEBUG] NGX JSON {url}: {e}")
 
-    print("[WARN] NGX movers: all sources failed")
+    # ── Source 2: NGX CSV/download endpoint ──────────────────────────────────
+    try:
+        csv_url = "https://ngxgroup.com/exchange/trade/equities-market/"
+        r = requests.get(csv_url, headers=headers, timeout=12)
+        print(f"[DEBUG] NGX equities page: {r.status_code}, {len(r.text)} chars")
+        text = r.text
+
+        # Look for data table rows with ticker + change columns
+        # NGX site typically has: <td>GTCO</td>...<td>+4.10%</td>
+        row_pattern = re.findall(
+            r'<tr[^>]*>.*?<td[^>]*>\s*([A-Z]{2,12})\s*</td>.*?([+-]?\d{1,3}\.\d{2})\s*%.*?</tr>',
+            text, re.DOTALL | re.IGNORECASE
+        )
+        print(f"[DEBUG] NGX equities rows found: {len(row_pattern)}")
+
+        movers = []
+        seen = set()
+        for sym, chg_str in row_pattern[:20]:
+            sym = sym.strip().upper()
+            if sym in seen or sym in EXCLUDE: continue
+            if not sym.isalpha(): continue
+            try:
+                chg = float(chg_str)
+                if abs(chg) > 15 or abs(chg) < 0.01: continue
+                movers.append({"name": sym, "change": chg})
+                seen.add(sym)
+            except ValueError:
+                pass
+        if len(movers) >= 2:
+            movers.sort(key=lambda x: abs(x["change"]), reverse=True)
+            top = movers[:3]
+            print(f"[INFO] NGX movers (NGX equities page): {[(m['name'], m['change']) for m in top]}")
+            return top
+    except Exception as e:
+        print(f"[DEBUG] NGX equities page: {e}")
+
+    # ── Source 3: Nairametrics with better pattern ────────────────────────────
+    try:
+        url = "https://nairametrics.com/category/market-data/equities/"
+        r = requests.get(url, headers=headers, timeout=15)
+        print(f"[DEBUG] Nairametrics: {r.status_code}, {len(r.text)} chars")
+        text = r.text
+
+        # Log a snippet to see what we're actually getting
+        # Find first percentage-looking string and surrounding context
+        sample = re.search(r'.{0,80}\d{1,3}\.\d{2}\s*%.{0,80}', text)
+        if sample:
+            print(f"[DEBUG] Nairametrics sample: {repr(sample.group()[:120])}")
+        else:
+            print("[DEBUG] Nairametrics: no percentage patterns found in page")
+
+        movers = []
+        seen = set()
+        # Multiple patterns — broad to narrow
+        for pat in [
+            r'\b([A-Z]{2,10})\b[^\n<]{0,60}([+-]\d{1,3}\.\d{2})\s*%',
+            r'([+-]\d{1,3}\.\d{2})\s*%[^\n<]{0,60}\b([A-Z]{2,10})\b',
+        ]:
+            for m in re.findall(pat, text):
+                sym, pct = (m[1], m[0]) if m[0][0] in "+-" else (m[0], m[1])
+                sym = sym.strip().upper()
+                if sym in seen or sym in EXCLUDE: continue
+                if not sym.isalpha() or len(sym) < 2: continue
+                try:
+                    chg = float(pct)
+                    if abs(chg) > 15 or abs(chg) < 0.01: continue
+                    movers.append({"name": sym, "change": chg})
+                    seen.add(sym)
+                except ValueError:
+                    pass
+
+        print(f"[DEBUG] Nairametrics movers found: {len(movers)}")
+        if len(movers) >= 2:
+            movers.sort(key=lambda x: abs(x["change"]), reverse=True)
+            top = movers[:3]
+            print(f"[INFO] NGX movers (Nairametrics): {[(m['name'], m['change']) for m in top]}")
+            return top
+    except Exception as e:
+        print(f"[DEBUG] Nairametrics: {e}")
+
+    # ── Source 4: BusinessDay ─────────────────────────────────────────────────
+    try:
+        url = "https://businessday.ng/markets/equities/"
+        r = requests.get(url, headers=headers, timeout=15)
+        print(f"[DEBUG] BusinessDay: {r.status_code}, {len(r.text)} chars")
+        text = r.text
+
+        movers = []
+        seen = set()
+        for pat in [
+            r'\b([A-Z]{2,10})\b[^\n<]{0,60}([+-]\d{1,3}\.\d{2})\s*%',
+        ]:
+            for m in re.findall(pat, text):
+                sym, pct = m[0], m[1]
+                sym = sym.strip().upper()
+                if sym in seen or sym in EXCLUDE: continue
+                if not sym.isalpha() or len(sym) < 2: continue
+                try:
+                    chg = float(pct)
+                    if abs(chg) > 15 or abs(chg) < 0.01: continue
+                    movers.append({"name": sym, "change": chg})
+                    seen.add(sym)
+                except ValueError:
+                    pass
+
+        print(f"[DEBUG] BusinessDay movers found: {len(movers)}")
+        if len(movers) >= 2:
+            movers.sort(key=lambda x: abs(x["change"]), reverse=True)
+            top = movers[:3]
+            print(f"[INFO] NGX movers (BusinessDay): {[(m['name'], m['change']) for m in top]}")
+            return top
+    except Exception as e:
+        print(f"[DEBUG] BusinessDay: {e}")
+
+    print("[WARN] NGX movers: all sources exhausted — check DEBUG lines above in logs")
     return None
+
 
 
 # ─── Aza Index ────────────────────────────────────────────────────────────────
