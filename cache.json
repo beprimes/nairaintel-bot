@@ -9,9 +9,22 @@
   "tier2": {
     "ngx_index": 104520,
     "ngx_change": 0.6,
-    "ngx_movers": [],
-    "ngx_movers_date": "",
-    "ngx_movers_available": false,
+    "ngx_movers": [
+      {
+        "name": "CONTENT",
+        "change": 5.49
+      },
+      {
+        "name": "CROSSING",
+        "change": 2.04
+      },
+      {
+        "name": "EQUITIES",
+        "change": 0.62
+      }
+    ],
+    "ngx_movers_date": "2026-02-22",
+    "ngx_movers_available": true,
     "petrol": 897,
     "diesel": 1771,
     "lpg_kg": 1200,
@@ -64,9 +77,9 @@
     "Feb-22"
   ],
   "scrape_failures": {
-    "ngx_movers": 5,
+    "ngx_movers": 0,
     "fuel": 0,
-    "reserves": 2,
+    "reserves": 3,
     "inflation": 0,
     "dangote": 0,
     "oil_production": 0
@@ -76,9 +89,9 @@
   "prev_zar_ngn": 83.723,
   "prev_egp_ngn": 28.31,
   "prev_xof_ngn": 2.417,
-  "last_btc_usd": 68021,
-  "last_eth_usd": 1975.97,
-  "last_bnb_usd": 622.93,
+  "last_btc_usd": 68065,
+  "last_eth_usd": 1977.19,
+  "last_bnb_usd": 623.23,
   "last_parallel": 1499.0,
   "last_cbn": 1346.19,
   "last_eur_ngn": 1585.24,
@@ -91,5 +104,5 @@
   "last_xof_ngn": 2.417,
   "last_gold_usd": 5097.44,
   "last_brent": 75.0,
-  "last_updated": "2026-02-22T08:39:41.776610"
+  "last_updated": "2026-02-22T08:47:36.765494"
 }
