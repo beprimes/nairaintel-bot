@@ -469,11 +469,41 @@ def fetch_ngx_movers(cache):
     }
 
     EXCLUDE = {
+        # Market/macro terms
         "NGX","ASI","NSE","CBN","GDP","CPI","USD","NGN","EUR","GBP",
-        "ETH","BTC","BNB","IMF","SEC","CAC","EPS","ROE","ROA","THE",
-        "AND","FOR","ALL","NEW","TOP","HOW","WHY","WHO","MAX","MIN",
+        "ETH","BTC","BNB","IMF","SEC","CAC","EPS","ROE","ROA",
         "YOY","QOQ","MOM","CEO","CFO","COO","ESG","IPO","AGM","FY",
-        "WAT","GMT","NBS","OPEC","NNPC","FIRS","NASD","NGN","NGX",
+        "WAT","GMT","NBS","OPEC","NNPC","FIRS","NASD",
+        # Common English words that appear in financial articles
+        "THE","AND","FOR","ALL","NEW","TOP","HOW","WHY","WHO","MAX","MIN",
+        "GET","SET","PUT","BUY","SELL","HOLD","RATE","GAIN","LOSS","RISE",
+        "FALL","WEEK","YEAR","LAST","NEXT","THIS","THAT","WITH","FROM",
+        "INTO","OVER","ALSO","BOTH","EACH","MORE","LESS","THAN","THEN",
+        # Page/UI words that appear on financial websites
+        "CONTENT","CROSSING","EQUITIES","MARKET","STOCK","SHARE","TRADE",
+        "PRICE","VALUE","INDEX","BOARD","GROUP","DAILY","CLOSE","OPEN",
+        "HIGH","LOW","VOLUME","CHANGE","PERCENT","TOTAL","LISTED","VIEW",
+        "READ","MORE","NEWS","DATA","LIVE","UPDATE","REPORT","CHART",
+        "ABOUT","CONTACT","HOME","MENU","SEARCH","LOGIN","SIGN",
+        # Time/date words
+        "MON","TUE","WED","THU","FRI","SAT","SUN","JAN","FEB","MAR",
+        "APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC",
+    }
+
+    # Additional check: real NGX tickers are almost always in this known set
+    # If we find something not in this list, require it to have abs(chg) > 1%
+    # to reduce false positives from random uppercase words
+    KNOWN_NGX = {
+        "GTCO","ZENITHBANK","MTNN","DANGCEM","AIRTELAFRI","FBNH","UBA",
+        "ACCESSCORP","STANBIC","TRANSCORP","OANDO","SEPLAT","NESTLE",
+        "GUINNESS","PRESCO","FLOURMILL","BUACEMENT","WAPCO","CADBURY",
+        "FIDELITYBK","UCAP","CUSTODIAN","MANSARD","HONYFLOUR","NASCON",
+        "UNILEVER","TOTAL","CONOIL","MRS","ETERNA","DANGSUGAR","INTBREW",
+        "CHAMPION","NNFM","LIVESTOCK","MEYER","UPDCREIT","CHAMS",
+        "MULTIVERSE","ACADEMY","LEARNING","SOVEREIGN","COURTVILLE",
+        "JAPAULGOLD","LINKASSURE","CORNERST","ROYALEX","MAYBAKER",
+        "FIDSON","GLAXOSMITH","NEIMETH","PHARMDEKO","MORISON",
+        "MBENEFIT","AIICO","LASACO","WAPIC","AXAMANSARD",
     }
 
     # ── Source 1: NGX daily price list CSV ───────────────────────────────────
@@ -574,9 +604,11 @@ def fetch_ngx_movers(cache):
                 if len(sym) < 3 or len(sym) > 10: continue
                 try:
                     chg = float(pct_str)
-                    if 0.01 <= abs(chg) <= 15:
-                        movers.append({"name": sym, "change": chg})
-                        seen.add(sym)
+                    if not (0.01 <= abs(chg) <= 15): continue
+                    # Unknown tickers need >1% move to be trusted
+                    if sym not in KNOWN_NGX and abs(chg) < 1.0: continue
+                    movers.append({"name": sym, "change": chg})
+                    seen.add(sym)
                 except ValueError:
                     pass
             print(f"[DEBUG] Nairametrics search movers: {len(movers)}")
