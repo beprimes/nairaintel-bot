@@ -13,10 +13,10 @@
     "ngx_movers_date": "",
     "ngx_movers_available": false,
     "petrol": 897,
-    "diesel": 1450,
+    "diesel": 1771,
     "lpg_kg": 1200,
     "kerosene": 950,
-    "fuel_date": "2026-02-21",
+    "fuel_date": "2026-02-22",
     "reserves": 34.2,
     "reserves_date": "2026-02-14"
   },
@@ -56,38 +56,40 @@
     "week_start": "2026-02-17"
   },
   "aza_history": [
+    26,
     26
   ],
   "aza_dates": [
-    "Feb-21"
+    "Feb-21",
+    "Feb-22"
   ],
   "scrape_failures": {
-    "ngx_movers": 3,
+    "ngx_movers": 4,
     "fuel": 0,
-    "reserves": 0,
+    "reserves": 1,
     "inflation": 0,
     "dangote": 0,
     "oil_production": 0
   },
-  "prev_kes_ngn": 10.439,
-  "prev_ghs_ngn": 122.772,
-  "prev_zar_ngn": 83.768,
-  "prev_egp_ngn": 28.319,
+  "prev_kes_ngn": 10.438,
+  "prev_ghs_ngn": 122.738,
+  "prev_zar_ngn": 83.723,
+  "prev_egp_ngn": 28.31,
   "prev_xof_ngn": 2.417,
-  "last_btc_usd": 68294,
-  "last_eth_usd": 1978.46,
-  "last_bnb_usd": 626.74,
-  "last_parallel": 1516.0,
-  "last_cbn": 1346.36,
-  "last_eur_ngn": 1585.814,
-  "last_gbp_ngn": 1814.741,
-  "last_cny_ngn": 194.681,
-  "last_kes_ngn": 10.439,
-  "last_ghs_ngn": 122.772,
-  "last_zar_ngn": 83.768,
-  "last_egp_ngn": 28.319,
+  "last_btc_usd": 68019,
+  "last_eth_usd": 1975.85,
+  "last_bnb_usd": 623.07,
+  "last_parallel": 1499.0,
+  "last_cbn": 1346.19,
+  "last_eur_ngn": 1585.24,
+  "last_gbp_ngn": 1814.267,
+  "last_cny_ngn": 194.418,
+  "last_kes_ngn": 10.438,
+  "last_ghs_ngn": 122.738,
+  "last_zar_ngn": 83.723,
+  "last_egp_ngn": 28.31,
   "last_xof_ngn": 2.417,
   "last_gold_usd": 5097.44,
   "last_brent": 75.0,
-  "last_updated": "2026-02-21T23:22:49.105120"
+  "last_updated": "2026-02-22T08:33:42.190013"
 }
