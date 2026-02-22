@@ -31,7 +31,7 @@ BOUNDS = {
     "eth_usd":  (500,   20000),
     "bnb_usd":  (50,    2000),
     "gold_usd":   (1500, 3500),  # Gold all-time high ~$3,100 as of Feb 2026
-    "silver_usd": (10,    100),  # Silver typically $20-50/oz
+    "silver_usd": (15,   50),   # Silver spot ~$28-35/oz, ATH $50
     "brent":    (20,    200),
     "petrol":   (400,   5000),
     "diesel":   (400,   8000),
@@ -479,12 +479,11 @@ def fetch_fx_reserves(cache):
 
 def fetch_ngx_movers(cache):
     """
-    NGX top movers via Yahoo Finance.
-    Major NGX stocks are listed with .LG suffix (Lagos Stock Exchange).
-    Yahoo Finance returns JSON — no scraping, no JS rendering issues.
-    We fetch ~20 major tickers, compute % change, return top 3 movers.
+    NGX top movers via Yahoo Finance with proper session/crumb auth.
+    Yahoo Finance requires a crumb token since 2023 — we get it via
+    a session cookie from visiting their site first.
+    Falls back to chart API per-ticker if batch quote fails.
     """
-    # Top 20 most liquid NGX stocks by market cap
     TICKERS = [
         "GTCO.LG", "ZENITHBANK.LG", "MTNN.LG", "DANGCEM.LG",
         "AIRTELAFRI.LG", "FBNH.LG", "UBA.LG", "ACCESSCORP.LG",
@@ -497,90 +496,108 @@ def fetch_ngx_movers(cache):
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                       "AppleWebKit/537.36 (KHTML, like Gecko) "
                       "Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "application/json",
+        "Accept": "application/json, text/plain, */*",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "https://finance.yahoo.com/",
+        "Origin": "https://finance.yahoo.com",
     }
 
+    def parse_movers(result_list):
+        movers = []
+        for item in result_list:
+            sym = (item.get("symbol") or "").replace(".LG", "").strip()
+            chg = item.get("regularMarketChangePercent")
+            if sym and chg is not None:
+                try:
+                    chg = float(chg)
+                    if 0.01 <= abs(chg) <= 15:
+                        movers.append({"name": sym, "change": round(chg, 2)})
+                except (ValueError, TypeError):
+                    pass
+        return movers
+
+    symbols_str = ",".join(TICKERS)
+
+    # ── Method 1: Session + crumb (Yahoo's standard auth since 2023) ──────────
     try:
-        symbols_str = ",".join(TICKERS)
+        session = requests.Session()
+        session.headers.update(headers)
 
-        # Try v7 quote endpoint — most reliable for regularMarketChangePercent
-        for base_url in [
-            "https://query1.finance.yahoo.com/v7/finance/quote",
-            "https://query2.finance.yahoo.com/v7/finance/quote",
-        ]:
-            try:
-                url = f"{base_url}?symbols={symbols_str}&fields=regularMarketChangePercent,regularMarketPrice,symbol"
-                r = requests.get(url, headers=headers, timeout=15)
-                print(f"[DEBUG] Yahoo Finance v7 ({base_url.split('.')[1]}): {r.status_code}")
-                if r.status_code != 200:
-                    continue
+        # Get cookies by visiting Yahoo Finance
+        session.get("https://finance.yahoo.com", timeout=10)
 
-                result = r.json().get("quoteResponse", {}).get("result", [])
-                print(f"[DEBUG] Yahoo Finance: {len(result)} quotes returned")
+        # Get crumb token
+        crumb_r = session.get(
+            "https://query1.finance.yahoo.com/v1/test/getcrumb",
+            timeout=10
+        )
+        print(f"[DEBUG] Yahoo crumb: {crumb_r.status_code}")
 
-                movers = []
-                for item in result:
-                    sym = (item.get("symbol") or "").replace(".LG","").strip()
-                    chg = item.get("regularMarketChangePercent")
-                    if sym and chg is not None:
-                        try:
-                            chg = float(chg)
-                            if 0.01 <= abs(chg) <= 15:
-                                movers.append({"name": sym, "change": round(chg, 2)})
-                                print(f"[DEBUG] {sym}: {chg:+.2f}%")
-                        except (ValueError, TypeError):
-                            pass
+        if crumb_r.status_code == 200:
+            crumb = crumb_r.text.strip()
+            print(f"[DEBUG] Yahoo crumb obtained: {crumb[:20]}...")
 
-                if len(movers) >= 2:
-                    movers.sort(key=lambda x: abs(x["change"]), reverse=True)
-                    top = movers[:3]
-                    print(f"[INFO] NGX movers (Yahoo v7): {[(m['name'],m['change']) for m in top]}")
-                    return top
-                elif len(result) > 0:
-                    print(f"[DEBUG] Yahoo: {len(result)} results but none had valid chg%")
-                    break  # Got a response, data just missing — try chart fallback
-            except Exception as e:
-                print(f"[DEBUG] Yahoo v7 error: {e}")
-                continue
-
+            # Batch quote with crumb
+            for base in ["query1", "query2"]:
+                url = (f"https://{base}.finance.yahoo.com/v7/finance/quote"
+                       f"?symbols={symbols_str}&crumb={crumb}")
+                r = session.get(url, timeout=15)
+                print(f"[DEBUG] Yahoo v7 ({base}) with crumb: {r.status_code}")
+                if r.status_code == 200:
+                    result = r.json().get("quoteResponse", {}).get("result", [])
+                    print(f"[DEBUG] Yahoo: {len(result)} quotes returned")
+                    movers = parse_movers(result)
+                    if len(movers) >= 2:
+                        movers.sort(key=lambda x: abs(x["change"]), reverse=True)
+                        top = movers[:3]
+                        print(f"[INFO] NGX movers (Yahoo+crumb): {[(m['name'],m['change']) for m in top]}")
+                        return top
+                    elif result:
+                        print(f"[DEBUG] {len(result)} results but no valid % change data")
+                        break
     except Exception as e:
-        print(f"[WARN] Yahoo Finance NGX: {e}")
+        print(f"[DEBUG] Yahoo session/crumb: {e}")
 
-    # ── Fallback: try yfinance-style quote for individual tickers ─────────────
+    # ── Method 2: Per-ticker chart API (no crumb needed) ─────────────────────
     try:
         movers = []
-        # Just try the top 5 most liquid — fewer requests, faster
-        for ticker in TICKERS[:8]:
+        session2 = requests.Session()
+        session2.headers.update(headers)
+        session2.get("https://finance.yahoo.com", timeout=8)
+
+        for ticker in TICKERS[:10]:
             try:
                 url = (f"https://query2.finance.yahoo.com/v8/finance/chart/{ticker}"
                        f"?interval=1d&range=5d")
-                r = requests.get(url, headers=headers, timeout=8)
+                r = session2.get(url, timeout=8)
                 if r.status_code != 200:
+                    print(f"[DEBUG] {ticker}: {r.status_code}")
                     continue
-                d = r.json()
-                meta = d.get("chart", {}).get("result", [{}])[0].get("meta", {})
-                price     = meta.get("regularMarketPrice")
-                prev      = meta.get("previousClose") or meta.get("chartPreviousClose")
-                sym       = ticker.replace(".LG", "")
+                meta = r.json().get("chart", {}).get("result", [{}])[0].get("meta", {})
+                price = meta.get("regularMarketPrice")
+                prev  = meta.get("previousClose") or meta.get("chartPreviousClose")
+                sym   = ticker.replace(".LG", "")
                 if price and prev and prev > 0:
                     chg = round(((price - prev) / prev) * 100, 2)
                     if 0.01 <= abs(chg) <= 15:
                         movers.append({"name": sym, "change": chg})
-                        print(f"[DEBUG] {sym}: {price} vs {prev} = {chg:+.2f}%")
+                        print(f"[DEBUG] {sym}: {chg:+.2f}%")
             except Exception:
                 pass
 
         if len(movers) >= 2:
             movers.sort(key=lambda x: abs(x["change"]), reverse=True)
             top = movers[:3]
-            print(f"[INFO] NGX movers (Yahoo chart fallback): "
-                  f"{[(m['name'], m['change']) for m in top]}")
+            print(f"[INFO] NGX movers (Yahoo chart): {[(m['name'],m['change']) for m in top]}")
             return top
+        else:
+            print(f"[DEBUG] Chart fallback: only {len(movers)} movers found")
     except Exception as e:
         print(f"[WARN] Yahoo chart fallback: {e}")
 
-    print("[WARN] NGX movers: Yahoo Finance unavailable — showing index only")
+    print("[WARN] NGX movers: all Yahoo methods failed — showing index only")
     return None
+
 
 
 
