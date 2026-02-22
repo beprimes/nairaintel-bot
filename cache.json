@@ -77,7 +77,7 @@
     "Feb-22"
   ],
   "scrape_failures": {
-    "ngx_movers": 1,
+    "ngx_movers": 2,
     "fuel": 0,
     "reserves": 4,
     "inflation": 0,
@@ -89,9 +89,9 @@
   "prev_zar_ngn": 83.723,
   "prev_egp_ngn": 28.31,
   "prev_xof_ngn": 2.417,
-  "last_btc_usd": 68002,
-  "last_eth_usd": 1975.87,
-  "last_bnb_usd": 622.28,
+  "last_btc_usd": 67971,
+  "last_eth_usd": 1974.82,
+  "last_bnb_usd": 622.29,
   "last_parallel": 1499.0,
   "last_cbn": 1346.19,
   "last_eur_ngn": 1585.24,
@@ -104,5 +104,5 @@
   "last_xof_ngn": 2.417,
   "last_gold_usd": 5097.44,
   "last_brent": 75.0,
-  "last_updated": "2026-02-22T08:56:12.283981"
+  "last_updated": "2026-02-22T09:09:25.065917"
 }
