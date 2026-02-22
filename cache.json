@@ -62,7 +62,7 @@
     "avg_income_date": "2025"
   },
   "weekly_tracking": {
-    "usd_ngn_week_high": 1516.0,
+    "usd_ngn_week_high": 1533.0,
     "usd_ngn_week_low": 1340,
     "btc_week_high": 68413,
     "btc_week_low": 61800,
@@ -77,7 +77,7 @@
     "Feb-22"
   ],
   "scrape_failures": {
-    "ngx_movers": 5,
+    "ngx_movers": 6,
     "fuel": 0,
     "reserves": 4,
     "inflation": 0,
@@ -89,10 +89,10 @@
   "prev_zar_ngn": 83.723,
   "prev_egp_ngn": 28.31,
   "prev_xof_ngn": 2.417,
-  "last_btc_usd": 67931,
-  "last_eth_usd": 1966.34,
-  "last_bnb_usd": 620.79,
-  "last_parallel": 1514.0,
+  "last_btc_usd": 67404,
+  "last_eth_usd": 1942.46,
+  "last_bnb_usd": 611.8,
+  "last_parallel": 1533.0,
   "last_cbn": 1346.19,
   "last_eur_ngn": 1585.24,
   "last_gbp_ngn": 1814.267,
@@ -104,5 +104,5 @@
   "last_xof_ngn": 2.417,
   "last_gold_usd": 2930.0,
   "last_brent": 75.0,
-  "last_updated": "2026-02-22T14:01:27.653354"
+  "last_updated": "2026-02-22T19:20:26.855977"
 }
