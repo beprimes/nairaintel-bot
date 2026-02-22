@@ -30,7 +30,8 @@ BOUNDS = {
     "btc_usd":  (10000, 500000),
     "eth_usd":  (500,   20000),
     "bnb_usd":  (50,    2000),
-    "gold_usd": (1500,  3500),  # Gold all-time high ~$3,100 as of Feb 2026
+    "gold_usd":   (1500, 3500),  # Gold all-time high ~$3,100 as of Feb 2026
+    "silver_usd": (10,    100),  # Silver typically $20-50/oz
     "brent":    (20,    200),
     "petrol":   (400,   5000),
     "diesel":   (400,   8000),
@@ -401,18 +402,26 @@ def fetch_commodities():
     Cocoa: tries multiple symbols (cc.f often unavailable on Stooq)
     """
     symbols = {"silver": ["xagusd", "xag.f"], "cocoa": ["cc.f", "cj.f", "cocoa.f"]}
+    # Bounds for commodity sanity checks
+    COMM_BOUNDS = {
+        "silver": (10,   100),    # Silver ~$20-50/oz
+        "cocoa":  (2000, 20000),  # Cocoa ~$5k-12k/ton
+    }
     results = {}
     for key, sym_list in symbols.items():
         if isinstance(sym_list, str): sym_list = [sym_list]
+        lo, hi = COMM_BOUNDS.get(key, (0, 999999))
         for sym in sym_list:
             val, prev = _stooq_latest_and_prev(sym)
-            if val:
+            if val and lo <= val <= hi:
                 results[f"{key}_usd"] = round(val, 2)
                 results[f"{key}_chg"] = _pct_chg(val, prev)
                 print(f"[INFO] {key} ({sym}): {val}")
                 break
+            elif val:
+                print(f"[WARN] {key} ({sym}): {val} outside bounds {lo}-{hi}")
         else:
-            print(f"[WARN] {key}: all symbols failed")
+            print(f"[WARN] {key}: all symbols failed or out of bounds")
     return results
 
 
@@ -492,50 +501,47 @@ def fetch_ngx_movers(cache):
     }
 
     try:
-        # Yahoo Finance v8 quote API — batch up to 20 symbols
         symbols_str = ",".join(TICKERS)
-        url = (f"https://query1.finance.yahoo.com/v8/finance/spark"
-               f"?symbols={symbols_str}&range=1d&interval=1d")
-        r = requests.get(url, headers=headers, timeout=15)
-        print(f"[DEBUG] Yahoo Finance spark: {r.status_code}")
 
-        if r.status_code != 200:
-            # Try v7 quote endpoint
-            url2 = (f"https://query1.finance.yahoo.com/v7/finance/quote"
-                    f"?symbols={symbols_str}")
-            r = requests.get(url2, headers=headers, timeout=15)
-            print(f"[DEBUG] Yahoo Finance v7: {r.status_code}")
+        # Try v7 quote endpoint — most reliable for regularMarketChangePercent
+        for base_url in [
+            "https://query1.finance.yahoo.com/v7/finance/quote",
+            "https://query2.finance.yahoo.com/v7/finance/quote",
+        ]:
+            try:
+                url = f"{base_url}?symbols={symbols_str}&fields=regularMarketChangePercent,regularMarketPrice,symbol"
+                r = requests.get(url, headers=headers, timeout=15)
+                print(f"[DEBUG] Yahoo Finance v7 ({base_url.split('.')[1]}): {r.status_code}")
+                if r.status_code != 200:
+                    continue
 
-        if r.status_code == 200:
-            data = r.json()
-            movers = []
+                result = r.json().get("quoteResponse", {}).get("result", [])
+                print(f"[DEBUG] Yahoo Finance: {len(result)} quotes returned")
 
-            # v7 response structure
-            result = (data.get("quoteResponse", {}).get("result") or
-                      data.get("spark", {}).get("result") or [])
+                movers = []
+                for item in result:
+                    sym = (item.get("symbol") or "").replace(".LG","").strip()
+                    chg = item.get("regularMarketChangePercent")
+                    if sym and chg is not None:
+                        try:
+                            chg = float(chg)
+                            if 0.01 <= abs(chg) <= 15:
+                                movers.append({"name": sym, "change": round(chg, 2)})
+                                print(f"[DEBUG] {sym}: {chg:+.2f}%")
+                        except (ValueError, TypeError):
+                            pass
 
-            for item in result:
-                sym   = (item.get("symbol") or "").replace(".LG", "").strip()
-                chg   = item.get("regularMarketChangePercent")
-                price = item.get("regularMarketPrice")
-
-                if sym and chg is not None:
-                    try:
-                        chg = float(chg)
-                        if 0.01 <= abs(chg) <= 15:
-                            movers.append({"name": sym, "change": round(chg, 2)})
-                    except (ValueError, TypeError):
-                        pass
-
-            if len(movers) >= 2:
-                movers.sort(key=lambda x: abs(x["change"]), reverse=True)
-                top = movers[:3]
-                print(f"[INFO] NGX movers (Yahoo Finance): "
-                      f"{[(m['name'], m['change']) for m in top]}")
-                return top
-            else:
-                print(f"[DEBUG] Yahoo Finance: {len(movers)} movers parsed from "
-                      f"{len(result)} results")
+                if len(movers) >= 2:
+                    movers.sort(key=lambda x: abs(x["change"]), reverse=True)
+                    top = movers[:3]
+                    print(f"[INFO] NGX movers (Yahoo v7): {[(m['name'],m['change']) for m in top]}")
+                    return top
+                elif len(result) > 0:
+                    print(f"[DEBUG] Yahoo: {len(result)} results but none had valid chg%")
+                    break  # Got a response, data just missing — try chart fallback
+            except Exception as e:
+                print(f"[DEBUG] Yahoo v7 error: {e}")
+                continue
 
     except Exception as e:
         print(f"[WARN] Yahoo Finance NGX: {e}")
@@ -844,11 +850,15 @@ def fetch_all_data(config):
         data.update(gold)
         cache["last_gold_usd"] = gold["gold_usd"]
     else:
-        # Fallback chain: last cached → hardcoded safe default
+        # Fallback: use cache only if value is sane, otherwise hardcode
         cached_gold = cache.get("last_gold_usd")
-        data["gold_usd"] = float(cached_gold) if cached_gold else 2900.0
+        if cached_gold and 1500 <= float(cached_gold) <= 3500:
+            data["gold_usd"] = float(cached_gold)
+            print(f"[INFO] Gold fallback (cache): ${data['gold_usd']:,.2f}/oz")
+        else:
+            data["gold_usd"] = 2930.0   # Feb 2026 approximate
+            print(f"[INFO] Gold fallback (hardcoded): ${data['gold_usd']:,.2f}/oz — cache had bad value {cached_gold}")
         data["gold_chg"] = None
-        print(f"[INFO] Gold fallback: ${data['gold_usd']:,.2f}/oz from cache")
 
     # ── Oil ───────────────────────────────────────────────────────────────────
     print("[INFO] Fetching oil prices...")
