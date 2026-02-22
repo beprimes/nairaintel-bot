@@ -452,176 +452,110 @@ def fetch_fx_reserves(cache):
 
 def fetch_ngx_movers(cache):
     """
-    NGX top movers — all known sources exhausted in debug run.
-    Root cause: JS-rendered pages return no stock data server-side.
-
-    Strategy:
-    1. NGX daily equity price list (CSV download — server-side, reliable)
-    2. Investing.com NGX page (renders some data server-side)
-    3. Compute movers ourselves from the NGX price list if CSV works
+    NGX top movers via Yahoo Finance.
+    Major NGX stocks are listed with .LG suffix (Lagos Stock Exchange).
+    Yahoo Finance returns JSON — no scraping, no JS rendering issues.
+    We fetch ~20 major tickers, compute % change, return top 3 movers.
     """
+    # Top 20 most liquid NGX stocks by market cap
+    TICKERS = [
+        "GTCO.LG", "ZENITHBANK.LG", "MTNN.LG", "DANGCEM.LG",
+        "AIRTELAFRI.LG", "FBNH.LG", "UBA.LG", "ACCESSCORP.LG",
+        "TRANSCORP.LG", "SEPLAT.LG", "OANDO.LG", "NESTLE.LG",
+        "PRESCO.LG", "FLOURMILL.LG", "BUACEMENT.LG", "DANGSUGAR.LG",
+        "STANBIC.LG", "FIDELITYBK.LG", "UCAP.LG", "CADBURY.LG",
+    ]
+
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                       "AppleWebKit/537.36 (KHTML, like Gecko) "
                       "Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,*/*",
-        "Accept-Language": "en-US,en;q=0.9",
+        "Accept": "application/json",
     }
 
-    EXCLUDE = {
-        # Market/macro terms
-        "NGX","ASI","NSE","CBN","GDP","CPI","USD","NGN","EUR","GBP",
-        "ETH","BTC","BNB","IMF","SEC","CAC","EPS","ROE","ROA",
-        "YOY","QOQ","MOM","CEO","CFO","COO","ESG","IPO","AGM","FY",
-        "WAT","GMT","NBS","OPEC","NNPC","FIRS","NASD",
-        # Common English words that appear in financial articles
-        "THE","AND","FOR","ALL","NEW","TOP","HOW","WHY","WHO","MAX","MIN",
-        "GET","SET","PUT","BUY","SELL","HOLD","RATE","GAIN","LOSS","RISE",
-        "FALL","WEEK","YEAR","LAST","NEXT","THIS","THAT","WITH","FROM",
-        "INTO","OVER","ALSO","BOTH","EACH","MORE","LESS","THAN","THEN",
-        # Page/UI words that appear on financial websites
-        "CONTENT","CROSSING","EQUITIES","MARKET","STOCK","SHARE","TRADE",
-        "PRICE","VALUE","INDEX","BOARD","GROUP","DAILY","CLOSE","OPEN",
-        "HIGH","LOW","VOLUME","CHANGE","PERCENT","TOTAL","LISTED","VIEW",
-        "READ","MORE","NEWS","DATA","LIVE","UPDATE","REPORT","CHART",
-        "ABOUT","CONTACT","HOME","MENU","SEARCH","LOGIN","SIGN",
-        # Time/date words
-        "MON","TUE","WED","THU","FRI","SAT","SUN","JAN","FEB","MAR",
-        "APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC",
-    }
-
-    # Additional check: real NGX tickers are almost always in this known set
-    # If we find something not in this list, require it to have abs(chg) > 1%
-    # to reduce false positives from random uppercase words
-    KNOWN_NGX = {
-        "GTCO","ZENITHBANK","MTNN","DANGCEM","AIRTELAFRI","FBNH","UBA",
-        "ACCESSCORP","STANBIC","TRANSCORP","OANDO","SEPLAT","NESTLE",
-        "GUINNESS","PRESCO","FLOURMILL","BUACEMENT","WAPCO","CADBURY",
-        "FIDELITYBK","UCAP","CUSTODIAN","MANSARD","HONYFLOUR","NASCON",
-        "UNILEVER","TOTAL","CONOIL","MRS","ETERNA","DANGSUGAR","INTBREW",
-        "CHAMPION","NNFM","LIVESTOCK","MEYER","UPDCREIT","CHAMS",
-        "MULTIVERSE","ACADEMY","LEARNING","SOVEREIGN","COURTVILLE",
-        "JAPAULGOLD","LINKASSURE","CORNERST","ROYALEX","MAYBAKER",
-        "FIDSON","GLAXOSMITH","NEIMETH","PHARMDEKO","MORISON",
-        "MBENEFIT","AIICO","LASACO","WAPIC","AXAMANSARD",
-    }
-
-    # ── Source 1: NGX daily price list CSV ───────────────────────────────────
-    # NGX publishes a daily equity price list as a downloadable file
-    csv_urls = [
-        "https://ngxgroup.com/exchange/trade/equities-market/?sidebar=equityprices",
-        "https://ngxgroup.com/wp-content/uploads/equity-price-list.csv",
-    ]
-    for url in csv_urls:
-        try:
-            r = requests.get(url, headers=headers, timeout=15)
-            print(f"[DEBUG] NGX CSV {url.split('/')[-1][:40]}: {r.status_code}, {len(r.text)} chars")
-            if r.status_code == 200 and "," in r.text and len(r.text) > 500:
-                lines = r.text.strip().split("\n")
-                movers = []
-                for line in lines[1:]:   # skip header
-                    parts = [p.strip().strip('"') for p in line.split(",")]
-                    if len(parts) < 4: continue
-                    sym = parts[0].upper()
-                    if sym in EXCLUDE or not sym.isalpha(): continue
-                    # Try to find a % change column
-                    for p in parts[1:]:
-                        p = p.replace("%","").replace("+","").strip()
-                        try:
-                            chg = float(p)
-                            if 0.01 <= abs(chg) <= 15:
-                                movers.append({"name": sym, "change": chg})
-                                break
-                        except ValueError:
-                            pass
-                if len(movers) >= 2:
-                    movers.sort(key=lambda x: abs(x["change"]), reverse=True)
-                    top = movers[:3]
-                    print(f"[INFO] NGX movers (CSV): {[(m['name'],m['change']) for m in top]}")
-                    return top
-        except Exception as e:
-            print(f"[DEBUG] NGX CSV: {e}")
-
-    # ── Source 2: Investing.com NGX stocks ────────────────────────────────────
     try:
-        url = "https://www.investing.com/equities/nigeria"
+        # Yahoo Finance v8 quote API — batch up to 20 symbols
+        symbols_str = ",".join(TICKERS)
+        url = (f"https://query1.finance.yahoo.com/v8/finance/spark"
+               f"?symbols={symbols_str}&range=1d&interval=1d")
         r = requests.get(url, headers=headers, timeout=15)
-        print(f"[DEBUG] Investing.com: {r.status_code}, {len(r.text)} chars")
+        print(f"[DEBUG] Yahoo Finance spark: {r.status_code}")
+
+        if r.status_code != 200:
+            # Try v7 quote endpoint
+            url2 = (f"https://query1.finance.yahoo.com/v7/finance/quote"
+                    f"?symbols={symbols_str}")
+            r = requests.get(url2, headers=headers, timeout=15)
+            print(f"[DEBUG] Yahoo Finance v7: {r.status_code}")
+
         if r.status_code == 200:
-            text = r.text
-            # Investing.com renders a table: <td class="pid-...">GTCO</td>
-            # with change column containing +4.10%
-            rows = re.findall(
-                r'<tr[^>]*data-row-link[^>]*>.*?</tr>',
-                text, re.DOTALL
-            )
-            print(f"[DEBUG] Investing.com rows: {len(rows)}")
+            data = r.json()
             movers = []
-            seen = set()
-            for row in rows[:30]:
-                # Extract symbol
-                sym_m = re.search(r'class="[^"]*bold[^"]*"[^>]*>([A-Z]{2,12})</', row)
-                # Extract % change
-                chg_m = re.search(r'([+-]\d{1,3}\.\d{2}%)', row)
-                if sym_m and chg_m:
-                    sym = sym_m.group(1).strip().upper()
-                    pct = chg_m.group(1).replace("%","").replace("+","")
-                    if sym in seen or sym in EXCLUDE: continue
+
+            # v7 response structure
+            result = (data.get("quoteResponse", {}).get("result") or
+                      data.get("spark", {}).get("result") or [])
+
+            for item in result:
+                sym   = (item.get("symbol") or "").replace(".LG", "").strip()
+                chg   = item.get("regularMarketChangePercent")
+                price = item.get("regularMarketPrice")
+
+                if sym and chg is not None:
                     try:
-                        chg = float(pct)
+                        chg = float(chg)
                         if 0.01 <= abs(chg) <= 15:
-                            movers.append({"name": sym, "change": chg})
-                            seen.add(sym)
-                    except ValueError:
+                            movers.append({"name": sym, "change": round(chg, 2)})
+                    except (ValueError, TypeError):
                         pass
+
             if len(movers) >= 2:
                 movers.sort(key=lambda x: abs(x["change"]), reverse=True)
                 top = movers[:3]
-                print(f"[INFO] NGX movers (Investing.com): {[(m['name'],m['change']) for m in top]}")
+                print(f"[INFO] NGX movers (Yahoo Finance): "
+                      f"{[(m['name'], m['change']) for m in top]}")
                 return top
-    except Exception as e:
-        print(f"[DEBUG] Investing.com: {e}")
+            else:
+                print(f"[DEBUG] Yahoo Finance: {len(movers)} movers parsed from "
+                      f"{len(result)} results")
 
-    # ── Source 3: Nairametrics search for daily market wrap ───────────────────
-    # Market wrap articles list top movers in plain text — more parseable
+    except Exception as e:
+        print(f"[WARN] Yahoo Finance NGX: {e}")
+
+    # ── Fallback: try yfinance-style quote for individual tickers ─────────────
     try:
-        url = "https://nairametrics.com/?s=ngx+top+gainers"
-        r = requests.get(url, headers=headers, timeout=15)
-        print(f"[DEBUG] Nairametrics search: {r.status_code}, {len(r.text)} chars")
-        if r.status_code == 200:
-            text = r.text
-            # Look for article snippets mentioning tickers and percentages
-            # e.g. "GTCO led gainers, rising 4.10%"
-            movers = []
-            seen = set()
-            pat = r'\b([A-Z]{2,10})\b[^.\n]{0,80}?(\d{1,3}\.\d{2})\s*(?:per\s*cent|percent|%)'
-            for m in re.findall(pat, text, re.IGNORECASE):
-                sym = m[0].strip().upper()
-                pct_str = m[1]
-                if sym in seen or sym in EXCLUDE: continue
-                if not sym.isalpha(): continue
-                # Only trust if it looks like a real ticker (3-10 chars)
-                if len(sym) < 3 or len(sym) > 10: continue
-                try:
-                    chg = float(pct_str)
-                    if not (0.01 <= abs(chg) <= 15): continue
-                    # Unknown tickers need >1% move to be trusted
-                    if sym not in KNOWN_NGX and abs(chg) < 1.0: continue
-                    movers.append({"name": sym, "change": chg})
-                    seen.add(sym)
-                except ValueError:
-                    pass
-            print(f"[DEBUG] Nairametrics search movers: {len(movers)}")
-            if len(movers) >= 2:
-                movers.sort(key=lambda x: abs(x["change"]), reverse=True)
-                top = movers[:3]
-                print(f"[INFO] NGX movers (Nairametrics search): "
-                      f"{[(m['name'],m['change']) for m in top]}")
-                return top
-    except Exception as e:
-        print(f"[DEBUG] Nairametrics search: {e}")
+        movers = []
+        # Just try the top 5 most liquid — fewer requests, faster
+        for ticker in TICKERS[:8]:
+            try:
+                url = (f"https://query2.finance.yahoo.com/v8/finance/chart/{ticker}"
+                       f"?interval=1d&range=5d")
+                r = requests.get(url, headers=headers, timeout=8)
+                if r.status_code != 200:
+                    continue
+                d = r.json()
+                meta = d.get("chart", {}).get("result", [{}])[0].get("meta", {})
+                price     = meta.get("regularMarketPrice")
+                prev      = meta.get("previousClose") or meta.get("chartPreviousClose")
+                sym       = ticker.replace(".LG", "")
+                if price and prev and prev > 0:
+                    chg = round(((price - prev) / prev) * 100, 2)
+                    if 0.01 <= abs(chg) <= 15:
+                        movers.append({"name": sym, "change": chg})
+                        print(f"[DEBUG] {sym}: {price} vs {prev} = {chg:+.2f}%")
+            except Exception:
+                pass
 
-    print("[WARN] NGX movers: all sources failed — will show index only")
+        if len(movers) >= 2:
+            movers.sort(key=lambda x: abs(x["change"]), reverse=True)
+            top = movers[:3]
+            print(f"[INFO] NGX movers (Yahoo chart fallback): "
+                  f"{[(m['name'], m['change']) for m in top]}")
+            return top
+    except Exception as e:
+        print(f"[WARN] Yahoo chart fallback: {e}")
+
+    print("[WARN] NGX movers: Yahoo Finance unavailable — showing index only")
     return None
 
 
