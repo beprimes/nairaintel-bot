@@ -30,7 +30,7 @@ BOUNDS = {
     "btc_usd":  (10000, 500000),
     "eth_usd":  (500,   20000),
     "bnb_usd":  (50,    2000),
-    "gold_usd": (1500,  6000),  # Wide range — gold hit $3k+ in 2025
+    "gold_usd": (1500,  3500),  # Gold all-time high ~$3,100 as of Feb 2026
     "brent":    (20,    200),
     "petrol":   (400,   5000),
     "diesel":   (400,   8000),
@@ -108,6 +108,15 @@ def fetch_exchange_rates(api_key):
             x = rates.get(currency)
             return round(ngn / x, 3) if (x and x > 0) else None
 
+        # XAU = troy oz per USD (e.g. 0.000342 oz per $1)
+        # Gold price USD/oz = 1 / XAU rate
+        xau = rates.get("XAU")
+        gold_usd = round(1 / xau, 2) if (xau and xau > 0) else None
+        if gold_usd:
+            print(f"[INFO] Gold (ExchangeRate-API): ${gold_usd:,.2f}/oz")
+        else:
+            print("[WARN] ExchangeRate-API: XAU not in response")
+
         return {
             "ngn":     ngn,
             "eur_ngn": cross("EUR"),
@@ -118,6 +127,7 @@ def fetch_exchange_rates(api_key):
             "zar_ngn": cross("ZAR"),
             "egp_ngn": cross("EGP"),
             "xof_ngn": cross("XOF"),
+            "gold_usd_fx": gold_usd,   # Gold from ExchangeRate-API
         }
     except Exception as e:
         print(f"[WARN] ExchangeRate-API: {e}")
@@ -248,22 +258,30 @@ def fetch_crypto_prices():
         return None
 
 
-def fetch_gold_price():
+def fetch_gold_price(gold_from_fx=None):
     """
-    Gold spot price (XAU/USD) from Stooq.
-    Tries multiple symbols in order — Stooq symbol availability varies.
-    Bounds: $1,500–$6,000/oz (wide enough for any realistic gold price).
+    Gold spot price (XAU/USD).
+    Source priority:
+      1. ExchangeRate-API XAU rate (passed in from the FX fetch — same API call, free)
+      2. Stooq xauusd (fallback)
+    Bounds: $1,500–$3,500/oz (gold ATH ~$3,100 as of Feb 2026)
     """
-    symbols = ["xauusd", "gc.f", "gold.f"]
-    for sym in symbols:
+    # Source 1: ExchangeRate-API (most reliable — already authenticated)
+    if gold_from_fx and 1500 <= gold_from_fx <= 3500:
+        print(f"[INFO] Gold (ExchangeRate-API): ${gold_from_fx:,.2f}/oz")
+        return {"gold_usd": gold_from_fx, "gold_chg": None}
+
+    # Source 2: Stooq fallback
+    for sym in ["xauusd", "gc.f", "xau.f"]:
         val, prev = _stooq_latest_and_prev(sym)
-        if val and 1500 <= val <= 6000:
+        if val and 1500 <= val <= 3500:
             chg = _pct_chg(val, prev)
-            print(f"[INFO] Gold spot (Stooq {sym}): ${val:,.2f}/oz")
+            print(f"[INFO] Gold (Stooq {sym}): ${val:,.2f}/oz")
             return {"gold_usd": round(val, 2), "gold_chg": chg}
         elif val:
-            print(f"[WARN] Gold Stooq {sym}: value {val} out of range 1500-6000")
-    print("[WARN] Gold: all Stooq symbols failed — using cache fallback")
+            print(f"[WARN] Gold Stooq {sym}: {val} rejected (outside 1500-3500)")
+
+    print("[WARN] Gold: all sources failed")
     return None
 
 
@@ -818,9 +836,10 @@ def fetch_all_data(config):
         data["bnb_usd"] = cache.get("last_bnb_usd",   580)
         data["bnb_chg"] = None
 
-    # ── Gold spot price (Stooq — NOT CoinGecko) ──────────────────────────────
+    # ── Gold spot price — ExchangeRate-API first, Stooq fallback ────────────
     print("[INFO] Fetching gold spot price...")
-    gold = fetch_gold_price()
+    gold_from_fx = fx.get("gold_usd_fx") if fx else None
+    gold = fetch_gold_price(gold_from_fx)
     if gold:
         data.update(gold)
         cache["last_gold_usd"] = gold["gold_usd"]
