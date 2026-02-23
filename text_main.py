@@ -15,6 +15,10 @@ import json
 import os
 import sys
 
+# WAT = UTC+1. Defined at module level so all functions can use it.
+# GitHub Actions runners are UTC — we never rely on TZ env var.
+WAT = datetime.timezone(datetime.timedelta(hours=1))
+
 
 def load_config():
     return {
@@ -86,7 +90,6 @@ def build_live_data_from_cache(cache):
 
 
 def main():
-    WAT = datetime.timezone(datetime.timedelta(hours=1))
     now_wat = datetime.datetime.now(tz=WAT)
 
     # FORCE_HOUR env var allows manual workflow_dispatch testing of specific slots
