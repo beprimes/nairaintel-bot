@@ -776,6 +776,193 @@ def _fit(text, limit=280):
 
 
 
+# ─── Type D: Rate snapshots ────────────────────────────────────────────────────
+#
+# Two sub-types, alternated by which hour fires:
+#   hour 6  → crypto snapshot  (BTC / ETH / SOL / USDT)
+#   hour 23 → FX snapshot      (USD / GBP / EUR / CAD)
+#
+# Format mirrors the style: "1 BTC ⇛ ₦X"
+# Timestamp pulled from live WAT time.
+# USDT/USDC use parallel rate as proxy (P2P USDT ≈ parallel).
+
+def render_type_d(hour, live_data):
+    """Render a rate snapshot post. hour 6 = crypto, hour 23 = FX."""
+    WAT = datetime.timezone(datetime.timedelta(hours=1))
+    now = datetime.datetime.now(tz=WAT)
+    ts  = now.strftime("%a %d %b, %Y • %I:%M %p")
+
+    d        = live_data
+    parallel = d.get("parallel", 1578)
+    cbn      = d.get("cbn", 1346)
+    btc      = d.get("btc_usd", 65640)
+    eth      = d.get("eth_usd", 1895)
+    sol      = d.get("sol_usd", 150)
+    eur      = d.get("eur_ngn", 1590)
+    gbp      = d.get("gbp_ngn", 1820)
+    cad      = d.get("cad_ngn", 1010)
+
+    # USDT/USDC track parallel rate very closely on P2P
+    usdt_ngn = round(parallel, 3)
+    usdc_ngn = round(parallel * 0.999, 3)   # USDC slight discount to USDT
+
+    btc_ngn  = round(btc * parallel, 3)
+    eth_ngn  = round(eth * parallel, 3)
+    sol_ngn  = round(sol * parallel, 3)
+
+    if hour == 6:
+        # Crypto snapshot
+        post = (
+            f"Avg. | {ts}\n"
+            f"1 BTC ⇛ ₦{btc_ngn:,.3f}\n"
+            f"1 ETH ⇛ ₦{eth_ngn:,.3f}\n"
+            f"1 SOL ⇛ ₦{sol_ngn:,.3f}\n"
+            f"1 USDT ⇛ ₦{usdt_ngn:,.3f}\n"
+            f"1 USDC ⇛ ₦{usdc_ngn:,.3f}"
+        )
+    else:
+        # FX snapshot (hour 23)
+        post = (
+            f"{ts}\n"
+            f"1 USD ⇛ ₦{parallel:,.3f}\n"
+            f"1 GBP ⇛ ₦{gbp:,.3f}\n"
+            f"1 EUR ⇛ ₦{eur:,.3f}\n"
+            f"1 CAD ⇛ ₦{cad:,.3f}\n"
+            f"CBN: ₦{cbn:,.3f}"
+        )
+
+    return post if len(post) <= 280 else _truncate(post)
+
+
+# ─── Type E: Engagement questions ─────────────────────────────────────────────
+#
+# 50 questions. Mix of:
+#   - Would you rather / A vs B choices
+#   - Opinion polls
+#   - Personal finance scenarios
+#   - Hot takes on Nigerian economy
+#
+# Rotates sequentially, no repeat until all 50 used.
+# No live data needed — pure engagement.
+
+TYPE_E_QUESTIONS = [
+    # ── Would you rather ───────────────────────────────────────────────────────
+    "If you had the opportunity today, would you choose to earn in dollars:\n\nA. Remotely from Nigeria\nB. Abroad\nC. Both (remote + relocation)\nD. I'm fine earning naira",
+
+    "Would you rather:\n\nA. ₦50M in Nigeria today\nB. $50,000 abroad with a stable job\n\nBe honest.",
+
+    "Would you rather own:\n\nA. A house in Lagos worth ₦150M\nB. $100,000 in a US index fund\n\nWhich actually builds more wealth?",
+
+    "If you could start over, would you:\n\nA. Stay in Nigeria and build here\nB. Japa and send remittances home\nC. Build abroad first, return later\nD. Never return",
+
+    "Would you rather earn:\n\nA. ₦15M once today\nB. ₦3M every year for 5 years\n\nWhich actually pays more?",
+
+    "If NEPA gave you 22hrs of electricity daily, would you:\n\nA. Still buy a generator\nB. Sell your generator immediately\nC. Keep it as backup",
+
+    "Would you rather:\n\nA. High salary in a toxic job\nB. Lower salary in a great environment\n\nWhat's your number? At what salary difference does it stop mattering?",
+
+    "Which would stress you out more:\n\nA. Losing ₦500k in a bad investment\nB. Watching inflation eat ₦500k in savings over 2 years\n\nBoth are losses. Which hits harder?",
+
+    # ── Personal finance scenarios ─────────────────────────────────────────────
+    "Your rent is ₦1.2M yearly and your salary is ₦2.4M.\nHalf your income goes to housing.\n\nIs that living or surviving?",
+
+    "You have ₦500k saved. What do you do with it?\n\nA. Dollar savings (Grey/Lemfi)\nB. Fixed deposit\nC. Crypto (BTC/USDT)\nD. Small business\nE. T-Bills",
+
+    "Which builds wealth faster:\n\nA. Saving more\nB. Earning more\n\nMost people debate this but the data is clear. What do you think?",
+
+    "How many months of expenses do you have saved as emergency fund?\n\nA. None\nB. 1–2 months\nC. 3–6 months\nD. 6+ months\n\nBe honest.",
+
+    "At what monthly income (naira) would you feel financially comfortable in Lagos?\n\nA. ₦500k\nB. ₦1M\nC. ₦2M\nD. ₦5M+",
+
+    "Your salary just doubled. What's the first thing you change?\n\nA. Accommodation\nB. Start investing\nC. Clear debt\nD. Nothing — lifestyle inflation is a trap",
+
+    "Is it better to:\n\nA. Rent forever and invest the difference\nB. Buy property as soon as possible\n\nNigeria context matters here.",
+
+    "What percentage of your income goes to food?\n\nA. Under 20%\nB. 20–35%\nC. 35–50%\nD. Over 50%\n\nNationally it's ~56%. Where do you sit?",
+
+    # ── Hot takes / opinions ───────────────────────────────────────────────────
+    "Hot take: Owning a car in Lagos is a financial mistake for most people.\n\nAgree or disagree?\n\nFuel + maintenance + parking + traffic time cost = ?",
+
+    "Real question: Is the Nigerian middle class extinct?\n\nA. Yes — it's just rich and poor now\nB. It's shrinking but exists\nC. It never really existed\nD. It's growing quietly",
+
+    "The naira has lost 99% of its value since 1985.\n\nWho's most responsible?\n\nA. The government\nB. Oil dependency\nC. CBN policy\nD. All of the above",
+
+    "Is crypto a legitimate wealth tool in Nigeria or mostly speculation?\n\nA. Legitimate — USDT saved many portfolios\nB. Speculation — too volatile\nC. Both depending on the coin\nD. I don't touch it",
+
+    "Hard truth: most Nigerian salary earners are getting poorer every year even if their salary increases.\n\nIs your salary growing faster than inflation (33.2%)?\n\nA. Yes\nB. No\nC. About the same",
+
+    "What's the biggest financial mistake Nigerians make?\n\nA. Not investing early\nB. Too much money in naira savings\nC. Lifestyle inflation\nD. Sending too much to family\nE. No emergency fund",
+
+    "Should Nigerian companies be forced to offer dollar salary options?\n\nA. Yes — protect workers from devaluation\nB. No — that would cause inflation\nC. Optional — let the market decide",
+
+    "Is Japa worth it financially in the long run?\n\nA. Yes — dollar income changes everything\nB. Depends on where you go\nC. No — cost of living abroad is underestimated\nD. Only if you send money back",
+
+    # ── Economy / current affairs ──────────────────────────────────────────────
+    "Petrol went from ₦185 to ₦897 in under 2 years.\n\nWho absorbed most of that cost?\n\nA. Workers (transport costs up)\nB. Business owners (logistics up)\nC. Consumers (everything got more expensive)\nD. All three equally",
+
+    "If the naira hit ₦2,000/$1, what would you do first?\n\nA. Convert all savings to dollars immediately\nB. Buy property (naira prices lag)\nC. Invest in local businesses (import competitors)\nD. Leave",
+
+    "Can Nigeria fix inflation without fixing the exchange rate?\n\nA. No — they're directly linked\nB. Yes — with the right fiscal policy\nC. Neither is fixable right now",
+
+    "Which is more damaging to the average Nigerian:\n\nA. High inflation (33%+)\nB. A weak naira (₦1,578/$1)\nC. Fuel prices (₦897/L)\nD. Electricity cost + generator bills",
+
+    "Nigeria earns billions in oil revenue but 40% of citizens are in poverty.\n\nWhat's the core problem?\n\nA. Corruption\nB. Population growth outpacing revenue\nC. Poor revenue management\nD. All of the above",
+
+    "Will the naira ever get back to ₦500/$1?\n\nA. Yes — in the next 5 years\nB. Yes — but it'll take 10+ years\nC. No — structural issues are too deep\nD. Only if oil hits $200/barrel",
+
+    # ── Investing & markets ────────────────────────────────────────────────────
+    "Best place to protect ₦1M from inflation right now?\n\nA. Dollar account (Grey/Lemfi)\nB. T-Bills (20% yield)\nC. NGX stocks\nD. Bitcoin\nE. Real estate",
+
+    "At 33% inflation, keeping ₦1M in a savings account loses you ~₦330k in real value per year.\n\nIs anyone still doing this intentionally? Why?",
+
+    "NGX All-Share Index has gone from 20,000 (2010) to 100,000+ (2024).\nBut the naira fell 600% in the same period.\n\nIs Nigerian stock market investing worth it in dollar terms?",
+
+    "T-Bills currently yield ~20% in Nigeria.\nInflation is 33%.\n\nThat's a -13% real return.\n\nIs there any safe naira investment that beats inflation right now?",
+
+    "Dollar-cost averaging: putting ₦50k/month into dollars for 5 years.\n\nRealistic for most Nigerians?\n\nA. Yes — cut expenses to make it work\nB. No — ₦50k is too much to lock away\nC. I'm already doing this\nD. I'd put it in crypto instead",
+
+    # ── Generational / lifestyle ───────────────────────────────────────────────
+    "Are Nigerian parents a financial liability or asset for their adult children?\n\nA. Liability — school fees + upkeep + medical\nB. Asset — inheritance, land, connections\nC. Both\nD. Depends entirely on the family",
+
+    "Gen Z Nigerians: are they more financially aware than previous generations?\n\nA. Yes — social media, crypto, side hustles\nB. No — same problems, just louder\nC. More aware but worse conditions\nD. Too early to judge",
+
+    "Side hustle or salary increase — which is the better wealth strategy in Nigeria?\n\nA. Side hustle — multiple income streams\nB. Salary — compound career growth\nC. Both are necessary\nD. Neither if you don't manage what you have",
+
+    "What's the minimum salary you'd accept to relocate from Lagos to Abuja?\n\nA. Same salary — Abuja is cheaper\nB. 20% increase\nC. 50% increase\nD. I'd never leave Lagos",
+
+    "Is having a car in Nigeria still a status symbol or just a necessity?\n\nA. Status — people still judge by car\nB. Necessity — public transport is unreliable\nC. Both depending on where you live\nD. It's becoming a burden",
+
+    # ── Savings / behaviour ────────────────────────────────────────────────────
+    "What's your savings strategy in 2026?\n\nA. Dollar-denominated accounts\nB. T-Bills / money market\nC. Crypto (USDT/BTC)\nD. I'm spending everything — survival mode\nE. NGX / stocks",
+
+    "How do you protect your naira income from devaluation?\n\nA. Convert to dollars immediately\nB. Buy assets (property, gold)\nC. Invest in stocks/T-Bills\nD. Spend it fast before it loses value\nE. I haven't figured this out yet",
+
+    "Is ₦70,000 minimum wage a joke, a crime, or a starting point?\n\nA. A joke — it's not survivable in any city\nB. A crime — government knows this\nC. A starting point — it just needs to rise faster\nD. It's not meant to be the only income",
+
+    "What financial goal are you working toward in 2026?\n\nA. Emergency fund (3–6 months)\nB. First investment\nC. Dollar savings\nD. Debt-free\nE. Property/land\nF. Survival — ask me again next year",
+
+    "Final question for the week: what's the one financial move you wish you'd made 5 years ago?\n\nDollar savings? Crypto? Property? Stocks?\n\nWhat was the missed opportunity?",
+]
+
+
+def render_type_e(cache):
+    """Pick next engagement question, rotate through pool without repeating."""
+    used = cache.get("text_post_used_e", [])
+    total = len(TYPE_E_QUESTIONS)
+    unused = [i for i in range(total) if i not in used]
+    if not unused:
+        cache["text_post_used_e"] = []
+        unused = list(range(total))
+    chosen = unused[0]
+    used_list = cache.get("text_post_used_e", [])
+    used_list.append(chosen)
+    cache["text_post_used_e"] = used_list
+    text = TYPE_E_QUESTIONS[chosen]
+    return text if len(text) <= 280 else _truncate(text)
+
+
+
+
 # ─── Main post builder ─────────────────────────────────────────────────────────
 
 def build_text_post(hour, live_data, cache):
@@ -855,6 +1042,16 @@ def build_text_post(hour, live_data, cache):
 
         text = render_type_c(template_name, type_c_data, live_data)
         return (text if text and len(text) <= 280 else _truncate(text or "")), "C"
+
+    # ── Type D ────────────────────────────────────────────────────────────────
+    elif slot_type == "D":
+        text = render_type_d(hour, live_data)
+        return (text if text and len(text) <= 280 else _truncate(text or "")), "D"
+
+    # ── Type E ────────────────────────────────────────────────────────────────
+    elif slot_type == "E":
+        text = render_type_e(cache)
+        return (text if text and len(text) <= 280 else _truncate(text or "")), "E"
 
     return None, None
 
