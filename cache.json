@@ -5,6 +5,9 @@
     "petrol_2023_baseline": "Pre-subsidy-removal petrol price May 2023 \u2014 used for tank_days_prev calc",
     "inflation": "Update manually each month when NBS publishes. Usually mid-month.",
     "ngx_movers": "Set ngx_movers_available=false \u2014 scraper not yet live. Bot shows index only."
+    "prev_parallel_month": 1499,
+    "prev_petrol_month": 897,
+    "prev_inflation_month": 33.2
   },
   "tier2": {
     "ngx_index": 104520,
