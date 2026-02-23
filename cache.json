@@ -1,13 +1,13 @@
 {
   "yr_ago_rate": 1490,
-  "prev_parallel_month": 1499,
+  "prev_parallel_month": 1578,
   "prev_petrol_month": 897,
   "prev_inflation_month": 33.2,
   "_notes": {
-    "yr_ago_rate": "Feb 2025 USD/NGN parallel market rate \u2014 used for salary erosion tracker. Update each Feb.",
-    "petrol_2023_baseline": "Pre-subsidy-removal petrol price May 2023 \u2014 used for tank_days_prev calc",
+    "yr_ago_rate": "Feb 2025 USD/NGN parallel market rate - used for salary erosion tracker. Update each Feb.",
+    "petrol_2023_baseline": "Pre-subsidy-removal petrol price May 2023 - used for tank_days_prev calc",
     "inflation": "Update manually each month when NBS publishes. Usually mid-month.",
-    "ngx_movers": "Set ngx_movers_available=false \u2014 scraper not yet live. Bot shows index only."
+    "ngx_movers": "Set ngx_movers_available=false - scraper not yet live. Bot shows index only."
   },
   "tier2": {
     "ngx_index": 104520,
@@ -112,5 +112,76 @@
   "last_updated": "2026-02-23T17:02:23.816148",
   "ngx_52w": {
     "2026-02-23": 104520
-  }
+  },
+  "type_c_data": {
+    "savings_rates": {
+      "GTBank": 4.0,
+      "Zenith Bank": 4.5,
+      "Access Bank": 5.0,
+      "UBA": 4.0,
+      "Kuda": 10.0,
+      "PiggyVest Flex": 10.0,
+      "PiggyVest Safelock": 13.0,
+      "Cowrywise": 14.5,
+      "Carbon": 15.0,
+      "_source": "approximate \u2014 verify at bank",
+      "_date": "2026-02-23"
+    },
+    "transfer_charges": {
+      "NIP_below_5k": 10,
+      "NIP_5k_to_50k": 25,
+      "NIP_above_50k": 50,
+      "stamp_duty": 50,
+      "ATM_own_bank": 0,
+      "ATM_other_bank_3": 35,
+      "card_maintenance": 50,
+      "SMS_alert": 4,
+      "_source": "CBN Revised Guide to Charges 2020",
+      "_date": "2026-02-23"
+    },
+    "investment_rates": {
+      "PiggyVest Safelock": {
+        "rate": 13.0,
+        "type": "fixed",
+        "min_days": 10
+      },
+      "Cowrywise": {
+        "rate": 14.5,
+        "type": "flexible",
+        "min_days": 1
+      },
+      "Carbon": {
+        "rate": 15.0,
+        "type": "fixed",
+        "min_days": 30
+      },
+      "Bamboo (USD)": {
+        "rate": 6.0,
+        "type": "flexible",
+        "min_days": 1
+      },
+      "Risevest (USD)": {
+        "rate": 10.0,
+        "type": "fixed",
+        "min_days": 90
+      },
+      "ARM Money Market": {
+        "rate": 18.5,
+        "type": "flexible",
+        "min_days": 1
+      },
+      "FBN Quest T-Bill": {
+        "rate": 20.0,
+        "type": "fixed",
+        "min_days": 91
+      },
+      "_source": "platform websites \u2014 verify before investing",
+      "_date": "2026-02-23",
+      "_inflation": null
+    }
+  },
+  "type_c_last_scrape": "2026-02-23",
+  "text_post_used_c": [
+    "bank_savings_rates"
+  ]
 }
