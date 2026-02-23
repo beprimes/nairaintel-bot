@@ -555,6 +555,411 @@ FACTS = [
         "category": "fiscal",
         "custom_calc": "tbill_real"
     },
+
+    # ── NAIRA MILESTONES (more) ───────────────────────────────────────────────
+
+    {
+        "text": "The naira was once so strong that Nigerians studying in the UK sent money BACK home.\n\nIn 1980 ₦1 = $1.52.\n\nToday ₦{parallel:,.0f} = $1.\n\nA complete reversal in one generation.\n\n📉 NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "devaluation"
+    },
+    {
+        "text": "The first time Nigeria officially devalued the naira was 1986 under IBB's structural adjustment.\n\nThe official rate went from ₦0.89/$ to ₦4/$.\n\nBy {yr} it stands at ₦{parallel:,.0f}/$.\n\nEvery adjustment promised growth. Most delivered pain first.\n\n📉 NairaIntel",
+        "placeholders": ["parallel", "yr"],
+        "category": "devaluation"
+    },
+    {
+        "text": "Nigeria has had more currency crises than most African nations.\n\n1986. 1992. 1999. 2008. 2015. 2016. 2020. 2023. 2024.\n\nEach one blamed on oil prices, politics, or speculators.\n\nEach one paid for by ordinary Nigerians.\n\n$1 = ₦{parallel:,.0f} today.\n\n📉 NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "devaluation"
+    },
+    {
+        "text": "In June 2023, the CBN unified Nigeria's exchange rate windows.\n\nWithin 48 hours, ₦460 became ₦750.\n\nWithin 6 months, it was ₦1,500.\n\nToday: ₦{parallel:,.0f}.\n\nUnification was the right call. The transition cost millions their savings.\n\n📉 NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "devaluation"
+    },
+
+    # ── PETROL (more) ─────────────────────────────────────────────────────────
+
+    {
+        "text": "Nigeria is Africa's largest oil producer.\n\nYet for 60 years it imported refined petrol.\n\nThe irony: crude oil pumped from Nigerian soil, shipped abroad, refined, shipped back, sold to Nigerians.\n\nDangote Refinery is the attempted fix.\n\nPetrol today: ₦{petrol:,}/L.\n\n⛽ NairaIntel",
+        "placeholders": ["petrol"],
+        "category": "fuel"
+    },
+    {
+        "text": "Nigeria spent ₦9.7 trillion on petrol subsidy in 2022 alone.\n\nThat is:\n— 3x the health budget\n— 4x the education budget\n— More than all infrastructure spending combined\n\nSubsidy removed June 2023.\nPetrol now: ₦{petrol:,}/L.\n\n⛽ NairaIntel",
+        "placeholders": ["petrol"],
+        "category": "fuel"
+    },
+    {
+        "text": "When petrol subsidy ended in June 2023, Nigerians were told prices would settle.\n\nPetrol was ₦185/L.\nIt hit ₦617/L within days.\nToday: ₦{petrol:,}/L.\n\nFor a Lagos bus driver spending ₦15,000/day on fuel, this was a pay cut.\n\n⛽ NairaIntel",
+        "placeholders": ["petrol"],
+        "category": "fuel"
+    },
+    {
+        "text": "Okada (motorcycle taxi) fares in Lagos roughly tripled between 2022 and 2024.\n\nNot because riders got greedy.\n\nBecause petrol went from ₦185/L to ₦{petrol:,}/L.\n\nEverything connects to the pump price.\n\n⛽ NairaIntel",
+        "placeholders": ["petrol"],
+        "category": "fuel"
+    },
+
+    # ── COMPARISON WITH PEERS (more) ─────────────────────────────────────────
+
+    {
+        "text": "GDP per capita comparison — sub-Saharan Africa:\n\n🇳🇬 Nigeria: ~$2,100\n🇬🇭 Ghana: ~$2,400\n🇿🇦 South Africa: ~$6,200\n🇧🇼 Botswana: ~$7,800\n🇰🇪 Kenya: ~$2,100\n\nNigeria — biggest economy. Not richest citizens.\n\nInflation today: {inflation}%.\n\n📊 NairaIntel",
+        "placeholders": ["inflation"],
+        "category": "comparison"
+    },
+    {
+        "text": "Rwanda's economy has grown every year since 2000, averaging 7% growth.\n\nNigeria's economy has contracted 3 times since 2014.\n\nRwanda: no oil. Strong institutions. Low inflation.\n\nNigeria: abundant oil. Weak institutions. {inflation}% inflation.\n\nResources are not destiny.\n\n📊 NairaIntel",
+        "placeholders": ["inflation"],
+        "category": "comparison"
+    },
+    {
+        "text": "Ethiopia became one of the world's fastest-growing economies from 2005-2019.\n\nNo oil. No mineral windfall.\n\nJust manufacturing, agriculture, and infrastructure investment.\n\nNigeria earns billions from oil.\nInflation is {inflation}%.\n\nGrowth strategy matters more than resources.\n\n📊 NairaIntel",
+        "placeholders": ["inflation"],
+        "category": "comparison"
+    },
+    {
+        "text": "Cost of living index (lower = cheaper):\n\n🇳🇬 Lagos: 34\n🇬🇭 Accra: 40\n🇿🇦 Johannesburg: 47\n🇬🇧 London: 78\n🇺🇸 New York: 100\n\nLagos appears cheap — but at ₦{parallel:,.0f}/$1 and {inflation}% inflation, it is expensive on a naira salary.\n\n📊 NairaIntel",
+        "placeholders": ["parallel", "inflation"],
+        "category": "comparison"
+    },
+
+    # ── BANKING (more) ────────────────────────────────────────────────────────
+
+    {
+        "text": "Soludo's 2005 bank consolidation reduced Nigerian banks from 89 to 25.\n\nThe goal: stronger, more stable banks.\n\nBy 2009, some of those \"stronger\" banks needed a $4B bailout.\n\nReform is necessary. Execution is everything.\n\n🏦 NairaIntel",
+        "placeholders": [],
+        "category": "banking"
+    },
+    {
+        "text": "Nigeria's banking sector holds over ₦100 trillion in assets.\n\nAt ₦{parallel:,.0f}/$1 that is roughly $67B.\n\nFor comparison, JPMorgan alone holds $3.9 trillion in assets.\n\nNigeria's entire banking system is 1.7% of one US bank.\n\n🏦 NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "banking"
+    },
+    {
+        "text": "The average Nigerian uses 2.3 bank accounts.\n\nReason: different accounts for salary, savings, transfers, and crypto.\n\nNot financial sophistication — it is working around the system's limitations.\n\nInflation: {inflation}%. Account holders: finding ways.\n\n🏦 NairaIntel",
+        "placeholders": ["inflation"],
+        "category": "banking"
+    },
+    {
+        "text": "In 2021, Flutterwave processed $9B in transactions.\n\nIn 2022, it was $16B.\n\nBy 2023, over $26B.\n\nNigerian fintech is processing more value annually than some African central banks hold in reserves.\n\n$1 = ₦{parallel:,.0f} and the payment rails keep growing.\n\n🏦 NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "fintech"
+    },
+    {
+        "text": "USSD banking (*737#, *894#, *901# etc.) reached 80M+ Nigerians before smartphones were common.\n\nNigeria built financial inclusion on feature phones, not apps.\n\nToday fintech apps dominate — but USSD still processes billions monthly for the unsmartphoned.\n\n🏦 NairaIntel",
+        "placeholders": [],
+        "category": "fintech"
+    },
+    {
+        "text": "The CBN introduced BVN (Bank Verification Number) in 2014.\n\n60M+ Nigerians enrolled.\n\nIt was the backbone that made digital banking, fintech, and credit scoring possible.\n\nOne policy. A decade of compounding impact.\n\n$1 = ₦{parallel:,.0f} today.\n\n🏦 NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "banking"
+    },
+
+    # ── CRYPTO & DIGITAL (more) ───────────────────────────────────────────────
+
+    {
+        "text": "When the CBN banned crypto in 2021, Nigerians moved to P2P.\n\nBinance P2P Nigeria became one of the busiest P2P markets globally.\n\nThe ban didn't stop crypto — it pushed it underground and made it harder to regulate.\n\nP2P rate today: ₦{parallel:,.0f}/$1.\n\n₿ NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "crypto"
+    },
+    {
+        "text": "Nigeria's crypto adoption ranked 2nd globally in 2022 (Chainalysis index).\n\nThis wasn't speculation — it was Nigerians protecting savings from {inflation}% inflation and naira devaluation.\n\nNecessity drives adoption faster than any marketing campaign.\n\n₿ NairaIntel",
+        "placeholders": ["inflation"],
+        "category": "crypto"
+    },
+    {
+        "text": "USDT (Tether) is effectively Nigeria's second dollar.\n\nMillions of Nigerians hold USDT as a dollar savings account.\n\nNo bank account needed. No CBN approval needed.\n\nAt ₦{parallel:,.0f}/$1, stability has a price — and the market found a way.\n\n₿ NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "crypto"
+    },
+
+    # ── JAPA / EMIGRATION (more) ──────────────────────────────────────────────
+
+    {
+        "text": "The UK introduced a Nigeria-specific Graduate visa route in 2021.\n\nApplications from Nigerians rose 600% in two years.\n\nNigeria now sends more students to UK universities than any other African country.\n\nInflation: {inflation}%. Brain drain: accelerating.\n\n✈️ NairaIntel",
+        "placeholders": ["inflation"],
+        "category": "japa"
+    },
+    {
+        "text": "A Nigerian accountant earns ~₦300,000/month in Lagos.\n\nThe same qualification earns ~£3,500/month in the UK.\n\nAt today's rate: £3,500 = ₦{uk_salary_naira:,.0f}/month.\n\nThat is {uk_multiplier:.0f}x the Nigerian salary.\n\nThe math of Japa is brutal.\n\n✈️ NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "japa",
+        "custom_calc": "uk_salary_naira"
+    },
+    {
+        "text": "Canada admitted 23,000+ Nigerian immigrants in 2023.\n\nMore than any year in history.\n\nMost are aged 25-40 — Nigeria's most productive demographic.\n\nEvery departure is ₦{parallel:,.0f}/$1 made real by a one-way ticket.\n\n✈️ NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "japa"
+    },
+    {
+        "text": "The irony of Japa:\n\nNigeria trains doctors, nurses, engineers, accountants.\nThey move abroad.\nThey send remittances back.\nRemittances now exceed $20B/year — more than oil revenue in some quarters.\n\nNigeria exports human capital. Imports dollars.\n\n$1 = ₦{parallel:,.0f}.\n\n✈️ NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "japa"
+    },
+
+    # ── DEBT & FISCAL (more) ──────────────────────────────────────────────────
+
+    {
+        "text": "Nigeria's federal budget for {yr}:\n\n~₦35 trillion total\n~₦8 trillion debt service\n~₦3 trillion education\n~₦1 trillion health\n\nThe country spends 8x more paying debt than educating its children.\n\nInflation: {inflation}%.\n\n💸 NairaIntel",
+        "placeholders": ["inflation", "yr"],
+        "category": "debt"
+    },
+    {
+        "text": "Nigeria's debt profile:\n\nDomestic debt: ~₦67 trillion\nExternal debt: ~$42B\n\nAt ₦{parallel:,.0f}/$1, external debt alone = ₦{external_debt_ngn:.1f} trillion.\n\nWhen the naira falls, the dollar debt grows — automatically, without borrowing a kobo more.\n\n💸 NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "debt",
+        "custom_calc": "external_debt_ngn"
+    },
+    {
+        "text": "Nigeria borrowed $3.4B from the World Bank in 2023 for development projects.\n\nAt ₦{parallel:,.0f}/$1, repayment in naira will cost far more than the original loan value by maturity.\n\nDollar debt + falling naira = the compounding trap.\n\n💸 NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "debt"
+    },
+
+    # ── POVERTY & INEQUALITY (more) ───────────────────────────────────────────
+
+    {
+        "text": "The richest 5 Nigerians have more wealth than the bottom 40% of the population combined.\n\nThat is 90M+ people.\n\nHigh inequality + high inflation ({inflation}%) + currency devaluation = the poorest pay the most.\n\n🔴 NairaIntel",
+        "placeholders": ["inflation"],
+        "category": "poverty"
+    },
+    {
+        "text": "Access to electricity by country:\n\n🇳🇬 Nigeria: 57% of population\n🇰🇪 Kenya: 75%\n🇬🇭 Ghana: 85%\n🇿🇦 South Africa: 85%\n🇷🇼 Rwanda: 48%\n\nWithout power, businesses can't grow.\nWithout businesses, jobs don't come.\n\nInflation: {inflation}%.\n\n⚡ NairaIntel",
+        "placeholders": ["inflation"],
+        "category": "infrastructure"
+    },
+    {
+        "text": "Nigeria's informal economy is estimated at 65% of total GDP.\n\nMost workers earn cash. Pay no tax. Access no credit.\n\nThey also feel inflation hardest — no employer benefits, no salary increments.\n\n{inflation}% inflation hits informal workers first and worst.\n\n💰 NairaIntel",
+        "placeholders": ["inflation"],
+        "category": "poverty"
+    },
+
+    # ── AGRICULTURE (more) ────────────────────────────────────────────────────
+
+    {
+        "text": "Nigeria's rice import bill: over $1B per year.\n\nIrony: the Niger Delta and Middle Belt can grow rice abundantly.\n\nBut poor roads, insecurity, and lack of storage mean imports are cheaper.\n\nAt ₦{parallel:,.0f}/$1 those imports cost more naira every year.\n\n🌾 NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "agriculture"
+    },
+    {
+        "text": "Tomato price in Lagos, 2024: ₦2,000+ per small basket.\n\nThe same basket was ₦300-500 in 2020.\n\nA 300-400% increase in 4 years.\n\nClimate shocks + naira collapse + rising diesel costs = food inflation that hurts the poorest most.\n\nInflation: {inflation}%.\n\n🍅 NairaIntel",
+        "placeholders": ["inflation"],
+        "category": "agriculture"
+    },
+    {
+        "text": "In the 1960s Nigeria exported groundnut pyramids that were world-famous.\n\nKano's groundnut pyramids were so large they appeared in National Geographic.\n\nToday Nigeria imports groundnut products.\n\nWhat happened between then and now is the story of oil, neglect, and missed diversification.\n\n🌾 NairaIntel",
+        "placeholders": [],
+        "category": "agriculture"
+    },
+
+    # ── INFRASTRUCTURE (more) ─────────────────────────────────────────────────
+
+    {
+        "text": "Lagos to Abuja by road: ~9 hours.\nLagos to Abuja by air: ~1 hour.\n\nThere is no functioning train service between Nigeria's two largest cities.\n\nThe Abuja-Kaduna rail is operational.\nThe Lagos-Ibadan rail is operational.\n\nBut Lagos-Abuja rail? Still a project.\n\nLogistics costs are inflation costs.\n\n🚂 NairaIntel",
+        "placeholders": [],
+        "category": "infrastructure"
+    },
+    {
+        "text": "Nigeria's road network is 195,000km.\n\nOnly 60,000km is paved.\n\nOnly 40% of that is in good condition.\n\nBad roads = high transport costs.\nHigh transport costs = expensive food.\nExpensive food = inflation.\n\nToday: {inflation}%.\n\n🛣️ NairaIntel",
+        "placeholders": ["inflation"],
+        "category": "infrastructure"
+    },
+    {
+        "text": "Every Lagos resident spends an average of 3-4 hours in traffic daily.\n\nThat is 750-1,000 hours per year — lost.\n\nEstimated economic cost of Lagos traffic: $9B annually.\n\nThis invisible tax is baked into every Lagos business cost.\n\n$1 = ₦{parallel:,.0f} today.\n\n🚗 NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "infrastructure"
+    },
+
+    # ── DEMOGRAPHICS (more) ───────────────────────────────────────────────────
+
+    {
+        "text": "Nigeria will have 400M people by 2050.\n\nThat is more than the entire current population of the United States.\n\nFor context:\n• US GDP: $27 trillion\n• Nigeria's GDP today: ~$253B\n\nThe gap that must close in 25 years is staggering.\n\nInflation today: {inflation}%.\n\n👥 NairaIntel",
+        "placeholders": ["inflation"],
+        "category": "demographics"
+    },
+    {
+        "text": "Lagos has a population of 15-20M depending on estimate.\n\nIt generates about 25% of Nigeria's entire GDP.\n\nOne city. 25% of the economy.\n\nIf Lagos were a country it would be one of Africa's top 5 economies.\n\n$1 = ₦{parallel:,.0f} today.\n\n👥 NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "demographics"
+    },
+    {
+        "text": "Nigeria's youth (under 30) make up 60%+ of the population.\n\nThey are the most educated generation in Nigerian history.\n\nThey are also the most likely to leave.\n\nRetaining them requires growth faster than inflation ({inflation}%) and opportunity faster than Japa.\n\n👥 NairaIntel",
+        "placeholders": ["inflation"],
+        "category": "demographics"
+    },
+
+    # ── HISTORY (more) ────────────────────────────────────────────────────────
+
+    {
+        "text": "Nigeria had 6 military coups between 1966 and 1993.\n\nEach disrupted economic policy mid-execution.\n\nNo long-term economic plan survived more than one government.\n\nPolitical stability is the foundation all other growth rests on.\n\nInflation today: {inflation}%.\n\n📅 NairaIntel",
+        "placeholders": ["inflation"],
+        "category": "history"
+    },
+    {
+        "text": "The Nigerian Civil War (1967-1970) killed 1-3M people, mostly from starvation.\n\nThe Biafra blockade created a food crisis that changed Nigeria's relationship with food security forever.\n\nToday food inflation sits well above overall CPI.\n\nThe hunger of the past echoes in the prices of today.\n\n📅 NairaIntel",
+        "placeholders": [],
+        "category": "history"
+    },
+    {
+        "text": "Nigeria's first economic boom came in the 1970s oil decade.\n\nGDP grew 8-10% annually.\n\nThe government response: import everything, build big, spend fast.\n\nWhen oil prices crashed in 1981, there was nothing left.\n\nBoom without savings = bust without cushion.\n\n$1 = ₦{parallel:,.0f} today.\n\n📅 NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "history"
+    },
+    {
+        "text": "Operation Feed the Nation launched in 1976 under Obasanjo.\n\nGreen Revolution launched in 1980 under Shagari.\n\nBoth aimed to make Nigeria food self-sufficient.\n\nBoth wound down when oil money returned.\n\nToday Nigeria imports over $7B in food annually.\n\nInflation: {inflation}%.\n\n📅 NairaIntel",
+        "placeholders": ["inflation"],
+        "category": "history"
+    },
+
+    # ── OIL & ENERGY (more) ───────────────────────────────────────────────────
+
+    {
+        "text": "Nigeria flares more gas than any other country in Africa.\n\nGas flaring = burning money.\n\nEstimated annual value of flared gas: $2-3B.\n\nAt ₦{parallel:,.0f}/$1 that is ₦{flare_naira:,.0f} trillion burned into the sky every year.\n\n🔥 NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "oil",
+        "custom_calc": "flare_naira"
+    },
+    {
+        "text": "The Petroleum Industry Act (PIA) was signed in 2021 after 20 years of debate.\n\nIt restructured NNPC into NNPC Ltd — a commercial entity.\n\nWhether it delivers on investment is still being decided.\n\nPetrol today: ₦{petrol:,}/L.\n\n🛢 NairaIntel",
+        "placeholders": ["petrol"],
+        "category": "oil"
+    },
+    {
+        "text": "NNPC Ltd posted its first-ever profit in 2022: $1.07B.\n\nBefore commercialisation, NNPC was famous for losing money despite selling oil.\n\nProfitability is one step. Transparency and reinvestment are the next.\n\nBrent today: the anchor of Nigeria's income.\n\n🛢 NairaIntel",
+        "placeholders": [],
+        "category": "oil"
+    },
+
+    # ── NGX / INVESTMENT (more) ───────────────────────────────────────────────
+
+    {
+        "text": "The NGX All-Share Index was 20,730 in January 2010.\n\nIt peaked at 100,000+ in 2024 for the first time.\n\nNominal return over 14 years: ~400%.\n\nBut the naira also fell ~600% in that period.\n\nNGX today: {ngx:,}.\n\nMeasure returns in the currency you spend.\n\n📈 NairaIntel",
+        "placeholders": ["ngx"],
+        "category": "ngx"
+    },
+    {
+        "text": "Treasury Bills vs inflation — Nigeria edition:\n\n91-day T-Bill yield: ~20%\nCurrent inflation: {inflation}%\nReal yield: {tbill_real:.1f}%\n\nFor once, government paper may actually beat inflation.\n\nBut only if you have large lump sums — minimum entry is typically ₦50M through primary dealers.\n\n💰 NairaIntel",
+        "placeholders": ["inflation"],
+        "category": "savings",
+        "custom_calc": "tbill_real"
+    },
+    {
+        "text": "Lagos Stock Exchange (now NGX) listed its first company in 1961.\n\nToday over 155 companies are listed.\n\nMarket cap: ~₦58 trillion.\n\nAt ₦{parallel:,.0f}/$1 that is ~$39B.\n\nFor context, Apple alone is worth $3.4 trillion.\n\nGrowth runway is massive.\n\n📈 NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "ngx"
+    },
+
+    # ── ENGAGEMENT (more) ─────────────────────────────────────────────────────
+
+    {
+        "text": "A tale of two strategies:\n\nPerson A: ₦1M in 2020 → kept in naira savings at 10%/yr → ₦1.46M today\nPerson B: ₦1M in 2020 → converted to $ at ₦360 → $2,778 → ₦{converted_ngn:,.0f} today\n\nSame start. Same year. Very different ending.\n\n💭 NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "engagement",
+        "custom_calc": "converted_ngn"
+    },
+    {
+        "text": "The most important financial skill in Nigeria:\n\n1. Earn in naira\n2. Convert to stable asset immediately\n3. Spend naira as needed\n4. Repeat\n\nIt sounds simple.\n\nAt {inflation}% inflation and ₦{parallel:,.0f}/$1, the difference is everything.\n\n💭 NairaIntel",
+        "placeholders": ["inflation", "parallel"],
+        "category": "engagement"
+    },
+    {
+        "text": "What ₦1,000,000 buys in Nigeria:\n\n2010: A small car\n2015: A decent motorcycle\n2020: A used okada or 6 months rent (Surulere)\n2024: ~1 month rent (mainland Lagos)\nToday: {million_naira_petrol:.0f} litres of petrol\n\n₦1M. Shrinking world.\n\n$1 = ₦{parallel:,.0f}.\n\n💸 NairaIntel",
+        "placeholders": ["petrol", "parallel"],
+        "category": "engagement",
+        "custom_calc": "million_naira_petrol"
+    },
+    {
+        "text": "Nigerians are among the most entrepreneurial people on earth.\n\nOver 40M small businesses operate in Nigeria.\n\nYet most can't access bank credit.\n\nMost operate with generators, water trucks, and private security.\n\nThey thrive despite the system — not because of it.\n\nInflation: {inflation}%.\n\n💪 NairaIntel",
+        "placeholders": ["inflation"],
+        "category": "engagement"
+    },
+    {
+        "text": "The average Nigerian household spends 56-60% of income on food.\n\nFor comparison: UK households spend ~10%.\n\nWhen food inflation runs at 30%+, a Nigerian family effectively loses 17-18% of ALL their income to food price increases alone.\n\nInflation: {inflation}%.\n\n🍽️ NairaIntel",
+        "placeholders": ["inflation"],
+        "category": "engagement"
+    },
+    {
+        "text": "Dollars under the mattress in Nigeria are not eccentric — they are rational.\n\n{inflation}% inflation\n₦{parallel:,.0f} to $1\nBank savings at 4-13%\n\nThe naira loses purchasing power faster than most accounts can compensate.\n\nUntil that changes, the mattress stays stacked.\n\n💵 NairaIntel",
+        "placeholders": ["inflation", "parallel"],
+        "category": "engagement"
+    },
+
+    # ── REMITTANCES (more) ────────────────────────────────────────────────────
+
+    {
+        "text": "A Nigerian in Canada sending $500 home monthly:\n\n2015: Recipient got ₦98,500\n2020: ₦180,000\n2023: ₦230,000\n2024: ₦750,000\nToday: ₦{remit_500:,.0f}\n\nThe diaspora's naira power has never been stronger.\n\nFor the sender the amount is the same. For the receiver — a lifeline.\n\n✈️ NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "remittances",
+        "custom_calc": "remit_500"
+    },
+    {
+        "text": "Western Union and MoneyGram used to dominate Nigeria remittances.\n\nNow Chipper Cash, Lemfi, Grey, and Wise have eaten their lunch.\n\nNigerian fintech didn't just serve the domestic market — it solved diaspora payments globally.\n\n$1 = ₦{parallel:,.0f}.\n\n✈️ NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "remittances"
+    },
+
+    # ── WAGES & PURCHASING POWER (more) ──────────────────────────────────────
+
+    {
+        "text": "Nigeria's minimum wage is ₦70,000/month (2024).\n\nCost of living for one adult in Lagos: ₦150,000-250,000/month minimum.\n\nMinimum wage covers ~30-50% of basic survival costs in the city.\n\nThe gap is filled by hustle, family support, and debt.\n\nInflation: {inflation}%.\n\n💰 NairaIntel",
+        "placeholders": ["inflation"],
+        "category": "wages"
+    },
+    {
+        "text": "A civil servant on grade level 10 earns ~₦150,000/month.\n\nAt ₦{parallel:,.0f}/$1 that is ${civil_servant_usd:.0f}/month.\n\nThe UN poverty line is $2.15/day.\n\nA grade level 10 civil servant earns ${civil_servant_usd:.0f}/month.\n\nThey are not poor by the metric. But they cannot afford Lagos.\n\n💰 NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "wages",
+        "custom_calc": "civil_servant_usd"
+    },
+
+    # ── CBN / POLICY (more) ───────────────────────────────────────────────────
+
+    {
+        "text": "The CBN raised interest rates 9 times between 2022 and 2024.\n\nFrom 11.5% to 27.5%.\n\nTheory: higher rates slow inflation.\nNigerian reality: {inflation}% inflation persists because most of it is supply-side, not demand-driven.\n\nRate hikes alone can't fix supply-side inflation.\n\n🏦 NairaIntel",
+        "placeholders": ["inflation"],
+        "category": "cbn"
+    },
+    {
+        "text": "The CBN's Ways & Means lending to the federal government:\n\n₦22.7 trillion lent 2020-2023.\n\nThis is the central bank printing money to fund government spending.\n\nResult: money supply expanded. Inflation followed.\n\nToday: {inflation}%. The bill arrived.\n\n🏦 NairaIntel",
+        "placeholders": ["inflation"],
+        "category": "cbn"
+    },
+    {
+        "text": "CBN's Monetary Policy Rate (MPR):\n\n2020: 11.5%\n2022: 16.5%\n2023: 18.75%\n2024: 27.5%\n\nInflation today: {inflation}%\n\nReal interest rate: {tbill_real:.1f}%\n\nFor the first time in years, savers who can access T-Bills or money market funds are beating inflation — barely.\n\n🏦 NairaIntel",
+        "placeholders": ["inflation"],
+        "category": "cbn",
+        "custom_calc": "tbill_real"
+    },
+
+    # ── PROPERTY (more) ───────────────────────────────────────────────────────
+
+    {
+        "text": "Average house price in Lagos vs income:\n\nA modest 2-bedroom in Surulere: ₦30-50M\nAverage formal sector salary: ₦300-500k/month\nMonths to save (100%): 60-166 months\nYears: 5-14 years of full salary saved\n\nAt {inflation}% inflation those savings shrink yearly.\n\nHomeownership in Lagos: a moving target.\n\n🏠 NairaIntel",
+        "placeholders": ["inflation"],
+        "category": "property"
+    },
+    {
+        "text": "Lagos property prices in dollars are cheaper than they were in 2014.\n\n2014: A Lekki apartment at ₦60M = $375,000 (₦160/$1)\n2025: Same apartment at ₦200M = $133,000 (₦1,500/$1)\n\nFor dollar holders, Nigerian real estate has never been more affordable.\n\nFor naira earners, the naira price is out of reach.\n\n$1 = ₦{parallel:,.0f}.\n\n🏠 NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "property"
+    },
+
+    # ── SAVINGS & INVESTMENT (more) ───────────────────────────────────────────
+
+    {
+        "text": "Dollar-denominated investment options in Nigeria:\n\n📈 Risevest (US stocks): ~10% annual return in USD\n📈 Bamboo (US ETFs): market returns in USD\n📈 Trove: US and Nigerian stocks in USD\n\nIn naira terms, any USD gain is amplified by devaluation.\n\n$1 = ₦{parallel:,.0f} today.\n\n💰 NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "savings"
+    },
+    {
+        "text": "The rule of 72: divide 72 by your annual return to find how many years to double your money.\n\nPiggyVest at 13%: doubles in 5.5 years\nBut inflation at {inflation}%: halves your purchasing power in {inflation_half:.1f} years\n\nYour money is in a race it may not be winning.\n\n💰 NairaIntel",
+        "placeholders": ["inflation"],
+        "category": "savings",
+        "custom_calc": "inflation_half"
+    },
 ]
 
 
@@ -611,6 +1016,14 @@ def render_fact(index, live_data):
     paystack_deval  = round(((parallel - 360) / 360) * 100, 1)
     poverty_line_naira = round(2.15 * parallel, 0)
     rice_dollar_cost = round(((parallel - 360) / 360) * 100, 1)
+    uk_salary_naira = round(3500 * parallel, 0)
+    uk_multiplier   = round(uk_salary_naira / 300000, 1)
+    flare_naira     = round(2.5 * parallel / 1000, 2)
+    converted_ngn   = round(2778 * parallel, 0)
+    million_naira_petrol = round(1000000 / petrol, 1) if petrol else 0
+    remit_500       = round(500 * parallel, 0)
+    civil_servant_usd = round(150000 / parallel, 1) if parallel else 0
+    inflation_half  = round(72 / inflation, 1) if inflation else 0
     lpg_per_kg      = live_data.get("lpg_kg", 1200)
 
     subs = {
@@ -642,6 +1055,14 @@ def render_fact(index, live_data):
         "rice_dollar_cost":    rice_dollar_cost,
         "lpg_per_kg":          lpg_per_kg,
         "diesel":              live_data.get("diesel", 1450),
+        "uk_salary_naira":     uk_salary_naira,
+        "uk_multiplier":       uk_multiplier,
+        "flare_naira":         flare_naira,
+        "converted_ngn":       converted_ngn,
+        "million_naira_petrol": million_naira_petrol,
+        "remit_500":           remit_500,
+        "civil_servant_usd":   civil_servant_usd,
+        "inflation_half":      inflation_half,
     }
 
     try:
