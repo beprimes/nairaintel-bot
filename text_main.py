@@ -86,6 +86,11 @@ def build_live_data_from_cache(cache):
         "btc_wk_lo":      wt.get("btc_week_low", 0),
         "salary_usd":     round(500000 / parallel) if parallel else 333,
         "yr":             datetime.datetime.now(tz=WAT).year,
+        "eur_ngn":        cache.get("last_eur_ngn", 1590),
+        "gbp_ngn":        cache.get("last_gbp_ngn", 1820),
+        "bnb_usd":        cache.get("last_bnb_usd", 600),
+        "diesel":         t2.get("diesel", 1450),
+        "spread_ngn":     round(parallel - cache.get("last_cbn", 1346), 0),
     }
 
 
