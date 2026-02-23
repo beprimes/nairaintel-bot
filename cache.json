@@ -1,16 +1,13 @@
 {
   "yr_ago_rate": 1490,
-
   "prev_parallel_month": 1499,
   "prev_petrol_month": 897,
   "prev_inflation_month": 33.2,
-
   "_notes": {
     "yr_ago_rate": "Feb 2025 USD/NGN parallel market rate \u2014 used for salary erosion tracker. Update each Feb.",
     "petrol_2023_baseline": "Pre-subsidy-removal petrol price May 2023 \u2014 used for tank_days_prev calc",
     "inflation": "Update manually each month when NBS publishes. Usually mid-month.",
     "ngx_movers": "Set ngx_movers_available=false \u2014 scraper not yet live. Bot shows index only."
-    
   },
   "tier2": {
     "ngx_index": 104520,
@@ -68,10 +65,10 @@
     "avg_income_date": "2025"
   },
   "weekly_tracking": {
-    "usd_ngn_week_high": 1534.0,
+    "usd_ngn_week_high": 1578.0,
     "usd_ngn_week_low": 1534.0,
     "btc_week_high": 65918,
-    "btc_week_low": 65918,
+    "btc_week_low": 65640,
     "week_start": "2026-02-23"
   },
   "aza_history": [
@@ -85,7 +82,7 @@
     "Feb-23"
   ],
   "scrape_failures": {
-    "ngx_movers": 7,
+    "ngx_movers": 8,
     "fuel": 1,
     "reserves": 5,
     "inflation": 0,
@@ -97,10 +94,10 @@
   "prev_zar_ngn": 83.961,
   "prev_egp_ngn": 28.218,
   "prev_xof_ngn": 2.421,
-  "last_btc_usd": 65918,
-  "last_eth_usd": 1884.96,
-  "last_bnb_usd": 599.28,
-  "last_parallel": 1534.0,
+  "last_btc_usd": 65640,
+  "last_eth_usd": 1894.99,
+  "last_bnb_usd": 604.36,
+  "last_parallel": 1578.0,
   "last_cbn": 1345.85,
   "last_eur_ngn": 1589.335,
   "last_gbp_ngn": 1818.224,
@@ -112,5 +109,8 @@
   "last_xof_ngn": 2.421,
   "last_gold_usd": 2930.0,
   "last_brent": 75.0,
-  "last_updated": "2026-02-23T08:52:28.037562"
+  "last_updated": "2026-02-23T17:02:23.816148",
+  "ngx_52w": {
+    "2026-02-23": 104520
+  }
 }
