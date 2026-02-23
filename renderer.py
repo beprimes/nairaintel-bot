@@ -114,7 +114,7 @@ def footer(draw, sources):
     draw.text((40, H-54), f"Sources: {sources}", font=fFt, fill="#506070")
     draw.text((40, H-35),
               "Posted 08:00 / 13:00 / 19:00 WAT  •  Not financial advice  •  "
-              "Cached data shows last-updated date  •  @NairaIntel",
+              "Cached data shows last-updated date  •  @AzaIndex",
               font=fFt, fill="#405060")
 
 def accent_bar(draw, color):
@@ -124,7 +124,7 @@ def page_header(draw, title, subtitle_tag, accent, post_time):
     draw.rectangle([(0, 0), (W, 5)], fill=accent)
     draw.text((40, 18), title, font=f(LS_B, 34), fill=WHITE)
     draw.text((40, 62), post_time, font=f(LS_R, 17), fill=LGRAY)
-    rt(draw, "@NairaIntel", f(LS_B, 16), W-40, 22, BLUE)
+    rt(draw, "@AzaIndex", f(LS_B, 16), W-40, 22, BLUE)
     rt(draw, subtitle_tag, f(LS_B, 13), W-40, 46, LGRAY)
     draw.line([(40, 94), (W-40, 94)], fill=BORDER, width=1)
 
@@ -466,18 +466,76 @@ def render_image2(data, out_path):
     draw.text((CX+PAD, CY+82), cs(ngx_chg), font=f(LM_B, 18), fill=cc(ngx_chg))
     rt(draw, "Today", f(LS_R, 14), CX+CW-PAD, CY+84, LGRAY)
     draw.line([(CX+PAD, CY+110), (CX+CW-PAD, CY+110)], fill=DIVIDER, width=1)
-    fMv = f(LS_R, 14); fMvH = f(LS_B, 13); fMvV = f(LM_B, 14)
-    if data.get("ngx_movers_available") and data.get("ngx_movers"):
-        draw.text((CX+PAD, CY+116), "Top Movers:", font=fMv, fill=LGRAY)
-        for i, mover in enumerate(data["ngx_movers"][:3]):
-            yy = CY + 132 + i * 16
-            draw.text((CX+PAD, yy), mover["name"], font=fMv, fill=LGRAY)
-            chg_m = mover["change"]
-            chg_str = f"{'▲' if chg_m >= 0 else '▼'}{abs(chg_m):.1f}%"
-            rt(draw, chg_str, fMvV, CX+CW-PAD, yy, cc(chg_m))
+
+    # ── 52-week range bar ──────────────────────────────────────────────────
+    ngx_now   = data.get("ngx", 104520)
+    ngx_high  = data.get("ngx_52w_high", ngx_now)
+    ngx_low   = data.get("ngx_52w_low",  ngx_now)
+    ngx_days  = data.get("ngx_52w_days", 1)
+    ngx_since = data.get("ngx_52w_since", "today")
+
+    # Label: "52W Range" once we have enough data, else "Range since {date}"
+    if ngx_days >= 30:
+        range_label = "52W Range:"
     else:
-        draw.text((CX+PAD, CY+116), "Top Movers:", font=fMv, fill=LGRAY)
-        draw.text((CX+PAD, CY+134), "See ngxgroup.com", font=f(LS_R, 13), fill=DGRAY)
+        # Format date nicely e.g. "Since Feb-21"
+        try:
+            import datetime as _dt
+            since_dt = _dt.datetime.strptime(ngx_since, "%Y-%m-%d")
+            range_label = f"Since {since_dt.strftime('%b-%d')}:"
+        except Exception:
+            range_label = "Range:"
+
+    fRng  = f(LS_R,  12)
+    fRngV = f(LM_B,  12)
+    fRngS = f(LS_R,  11)
+
+    # Row 1: label + low — high
+    draw.text((CX+PAD, CY+116), range_label, font=fRng, fill=LGRAY)
+    low_str  = f"{ngx_low:,.0f}"
+    high_str = f"{ngx_high:,.0f}"
+    draw.text((CX+PAD, CY+130), low_str,  font=fRngV, fill=RED)
+    rt(draw,              high_str, fRngV, CX+CW-PAD, CY+130, GREEN)
+
+    # Row 2: range bar
+    bar_x  = CX + PAD
+    bar_y  = CY + 148
+    bar_w  = CW - PAD * 2
+    bar_h  = 6
+
+    # Draw background track
+    draw.rounded_rectangle(
+        [(bar_x, bar_y), (bar_x + bar_w, bar_y + bar_h)],
+        radius=3, fill=DGRAY
+    )
+
+    # Current position marker — clamp between 0 and bar_w
+    rng = ngx_high - ngx_low
+    if rng > 0:
+        pos_ratio = (ngx_now - ngx_low) / rng
+    else:
+        pos_ratio = 0.5
+    pos_ratio = max(0.0, min(1.0, pos_ratio))
+
+    # Draw filled portion up to current position
+    filled_w = max(4, int(bar_w * pos_ratio))
+    fill_col = GREEN if pos_ratio >= 0.5 else YELLOW
+    draw.rounded_rectangle(
+        [(bar_x, bar_y), (bar_x + filled_w, bar_y + bar_h)],
+        radius=3, fill=fill_col
+    )
+
+    # Draw position dot
+    dot_x = bar_x + filled_w
+    draw.ellipse(
+        [(dot_x - 4, bar_y - 2), (dot_x + 4, bar_y + bar_h + 2)],
+        fill=WHITE, outline=BG, width=1
+    )
+
+    # Row 3: position label
+    pct_pos = round(pos_ratio * 100)
+    pos_label = f"Now: {pct_pos}% of range"
+    draw.text((CX+PAD, CY+160), pos_label, font=fRngS, fill=LGRAY)
 
     # ── MACRO INDICATORS ───────────────────────────────────────────────────
     CX, CY, CW, CH = 620, TOP+195, 268, 185
