@@ -123,6 +123,7 @@ def fetch_exchange_rates(api_key):
             "eur_ngn": cross("EUR"),
             "gbp_ngn": cross("GBP"),
             "cny_ngn": cross("CNY"),
+            "cad_ngn": cross("CAD"),
             "kes_ngn": cross("KES"),
             "ghs_ngn": cross("GHS"),
             "zar_ngn": cross("ZAR"),
@@ -232,7 +233,7 @@ def fetch_crypto_prices():
     try:
         url = "https://api.coingecko.com/api/v3/simple/price"
         params = {
-            "ids": "bitcoin,ethereum,binancecoin",
+            "ids": "bitcoin,ethereum,binancecoin,solana",
             "vs_currencies": "usd",
             "include_24hr_change": "true"
         }
@@ -244,6 +245,7 @@ def fetch_crypto_prices():
             ("bitcoin",     "btc_usd", "btc_chg", "btc_usd"),
             ("ethereum",    "eth_usd", "eth_chg", "eth_usd"),
             ("binancecoin", "bnb_usd", "bnb_chg", "bnb_usd"),
+            ("solana",      "sol_usd", "sol_chg", "sol_usd"),
         ]
         for coin, price_key, chg_key, bounds_key in mapping:
             p = data.get(coin, {}).get("usd")
@@ -252,7 +254,8 @@ def fetch_crypto_prices():
                 result[chg_key]   = data[coin].get("usd_24h_change")
         if result:
             print(f"[INFO] Crypto: BTC ${result.get('btc_usd',0):,}  "
-                  f"ETH ${result.get('eth_usd',0):,}  BNB ${result.get('bnb_usd',0)}")
+                  f"ETH ${result.get('eth_usd',0):,}  BNB ${result.get('bnb_usd',0)}  "
+                  f"SOL ${result.get('sol_usd',0)}")
         return result if result else None
     except Exception as e:
         print(f"[WARN] CoinGecko: {e}")
@@ -849,12 +852,13 @@ def fetch_all_data(config):
     crypto = fetch_crypto_prices()
     if crypto:
         data.update(crypto)
-        for k in ["btc_usd", "eth_usd", "bnb_usd"]:
+        for k in ["btc_usd", "eth_usd", "bnb_usd", "sol_usd"]:
             if k in crypto: cache[f"last_{k}"] = crypto[k]
     else:
         data["btc_usd"] = cache.get("last_btc_usd", 85000)
         data["btc_chg"] = None
         data["eth_usd"] = cache.get("last_eth_usd",  2100)
+        data["sol_usd"] = cache.get("last_sol_usd",  150)
         data["eth_chg"] = None
         data["bnb_usd"] = cache.get("last_bnb_usd",   580)
         data["bnb_chg"] = None
@@ -1105,6 +1109,7 @@ def fetch_all_data(config):
         "last_eur_ngn":  data.get("eur_ngn"),
         "last_gbp_ngn":  data.get("gbp_ngn"),
         "last_cny_ngn":  data.get("cny_ngn"),
+        "last_cad_ngn":  data.get("cad_ngn"),
         "last_kes_ngn":  data.get("kes_ngn"),
         "last_ghs_ngn":  data.get("ghs_ngn"),
         "last_zar_ngn":  data.get("zar_ngn"),
@@ -1113,6 +1118,7 @@ def fetch_all_data(config):
         "last_btc_usd":  data.get("btc_usd"),
         "last_eth_usd":  data.get("eth_usd"),
         "last_bnb_usd":  data.get("bnb_usd"),
+        "last_sol_usd":  data.get("sol_usd"),
         "last_gold_usd": data.get("gold_usd"),
         "last_brent":    data.get("brent"),
         "last_updated":  now.isoformat(),
