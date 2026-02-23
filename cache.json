@@ -183,5 +183,8 @@
   "type_c_last_scrape": "2026-02-23",
   "text_post_used_c": [
     "bank_savings_rates"
+  ],
+  "text_post_used_facts": [
+    50
   ]
 }
