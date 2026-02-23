@@ -15,11 +15,6 @@ import json
 import os
 import sys
 
-# WAT = UTC+1. GitHub Actions runners are UTC.
-# We compute WAT explicitly rather than relying on TZ env var,
-# which Python's datetime.now() does not always pick up.
-WAT = datetime.timezone(datetime.timedelta(hours=1))
-
 
 def load_config():
     return {
@@ -91,19 +86,18 @@ def build_live_data_from_cache(cache):
 
 
 def main():
+    WAT = datetime.timezone(datetime.timedelta(hours=1))
     now_wat = datetime.datetime.now(tz=WAT)
 
     # FORCE_HOUR env var allows manual workflow_dispatch testing of specific slots
     force_hour = os.environ.get("FORCE_HOUR", "").strip()
-    if force_hour and force_hour.isdigit():
-        hour = int(force_hour)
-        print(f"[INFO] FORCE_HOUR override: using hour {hour:02d}:00 WAT")
-    else:
-        hour = now_wat.hour
+    force_hour = int(force_hour) if (force_hour and force_hour.isdigit()) else None
+
+    if force_hour is not None:
+        print(f"[INFO] FORCE_HOUR override: using hour {force_hour:02d}:00 WAT")
 
     print(f"\n{'='*55}")
     print(f"NairaIntel Text Bot — {now_wat.strftime('%Y-%m-%d %H:%M WAT')}")
-    print(f"Current hour: {hour:02d}:00 WAT")
     print(f"{'='*55}\n")
 
     config = load_config()
@@ -116,30 +110,41 @@ def main():
         print(f"[ERROR] Missing secrets: {', '.join(missing)}")
         sys.exit(1)
 
-    # Check if this is a text post hour
-    from post_schedule import is_text_post_hour, TEXT_POST_HOURS
-    if not is_text_post_hour(hour):
-        print(f"[INFO] Hour {hour:02d}:00 is not a text post slot.")
-        print(f"[INFO] Text post slots: {TEXT_POST_HOURS}")
+    # Resolve which slot we're in — handles late cron fires up to 90 min
+    from post_schedule import resolve_slot, TEXT_POST_HOURS, SLOT_CATEGORIES
+    should_post, slot_hour = resolve_slot(now_wat=now_wat, force_hour=force_hour)
+
+    if not should_post:
+        current_str = now_wat.strftime("%H:%M")
+        print(f"[INFO] {current_str} WAT is not within 90 min of any text post slot.")
+        print(f"[INFO] Slots: {TEXT_POST_HOURS}")
         print("[INFO] Nothing to do. Exiting cleanly.")
         sys.exit(0)
 
-    print(f"[INFO] Hour {hour:02d}:00 IS a text post slot. Building post...")
+    minutes_late = now_wat.hour * 60 + now_wat.minute - slot_hour * 60
+    print(f"[INFO] Slot: {slot_hour:02d}:00 WAT "
+          f"(running {minutes_late} min after scheduled time)")
 
-    # Load cache and build live data
-    cache     = load_cache()
+    # Guard against double-posting the same slot (e.g. if cron fires twice)
+    cache = load_cache()
+    last_posted_key = f"last_posted_{now_wat.strftime('%Y-%m-%d')}_{slot_hour:02d}"
+    if cache.get(last_posted_key):
+        print(f"[INFO] Slot {slot_hour:02d}:00 already posted today. Skipping.")
+        sys.exit(0)
+
+    # Load cache and build live data (already loaded above for double-post guard)
     live_data = build_live_data_from_cache(cache)
 
     print(f"[INFO] Live data: parallel=₦{live_data['parallel']:,} "
           f"inflation={live_data['inflation']}% "
           f"petrol=₦{live_data['petrol']:,}/L")
 
-    # Build the post
+    # Build the post using the canonical slot_hour for content type
     from text_poster import build_text_post
-    post_text, post_type = build_text_post(hour, live_data, cache)
+    post_text, post_type = build_text_post(slot_hour, live_data, cache)
 
     if not post_text:
-        print(f"[WARN] No post generated for hour {hour}. Exiting.")
+        print(f"[WARN] No post generated for slot {slot_hour:02d}:00. Exiting.")
         save_cache(cache)
         sys.exit(0)
 
@@ -155,24 +160,25 @@ def main():
         sys.exit(1)
 
     # Update monthly baseline values for direction-awareness
-    # Only update on 1st of each month to track monthly changes
-    if now_wat.day == 1 and now_wat.hour == 6:
+    # Only update on 1st of each month at the 06:00 slot
+    if now_wat.day == 1 and slot_hour == 6:
         cache["prev_parallel_month"] = live_data["parallel"]
         cache["prev_petrol_month"]   = live_data["petrol"]
         cache["prev_inflation_month"] = live_data["inflation"]
         print("[INFO] Updated monthly baseline values in cache.")
 
-    # Save cache (updated used-fact indices)
-    save_cache(cache)
-
     if config["DRY_RUN"]:
-        print("\n[DRY RUN] Post NOT sent to X. Exiting.")
+        print("\n[DRY RUN] Post NOT sent to X. Cache NOT marked as posted.")
+        save_cache(cache)
         return
 
     # Post to X
     from text_poster import post_text_tweet
     try:
         tweet_id = post_text_tweet(post_text, config)
+        # Mark this slot as posted so a late-firing duplicate cron won't double-post
+        cache[last_posted_key] = tweet_id
+        save_cache(cache)
         print(f"\n[SUCCESS] Type {post_type} post live: "
               f"https://x.com/i/web/status/{tweet_id}")
     except Exception as e:
