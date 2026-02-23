@@ -82,18 +82,69 @@ def get_cycle_day():
     return cycle_day
 
 
-def is_text_post_hour(hour=None):
-    """Returns True if the current WAT hour is a text post slot."""
-    if hour is None:
-        hour = datetime.datetime.now().hour
-    return hour in TEXT_POST_HOURS
+def resolve_slot(now_wat=None, force_hour=None):
+    """
+    Returns (should_post, slot_hour) where:
+      - should_post: True if we are within the posting window of a scheduled slot
+      - slot_hour:   the canonical slot hour to use for content-type lookup
+
+    Logic:
+      GitHub Actions crons can fire up to ~30 min late, occasionally more.
+      We allow up to 90 minutes after a slot's scheduled time.
+      This means if the 21:00 WAT slot fires at 22:29 WAT we still post —
+      but if it fires at 22:30+ we skip (too close to the 23:00 slot).
+
+    Also guards against double-posting: the cache tracks the last slot posted
+    per day, so even if a cron fires twice we won't post the same slot twice.
+    """
+    if force_hour is not None:
+        # Manual override — trust it completely
+        slot_hour = int(force_hour)
+        return (slot_hour in TEXT_POST_HOURS), slot_hour
+
+    if now_wat is None:
+        WAT = datetime.timezone(datetime.timedelta(hours=1))
+        now_wat = datetime.datetime.now(tz=WAT)
+
+    current_minutes = now_wat.hour * 60 + now_wat.minute
+
+    best_slot = None
+    best_delta = None
+
+    for slot_hour in TEXT_POST_HOURS:
+        slot_minutes = slot_hour * 60
+        delta = current_minutes - slot_minutes   # positive = we're past the slot
+
+        # Only consider slots we're AFTER (delta >= 0) and within 60 min
+        if 0 <= delta <= 60:
+            if best_delta is None or delta < best_delta:
+                best_delta = delta
+                best_slot = slot_hour
+
+    if best_slot is None:
+        return False, None
+
+    return True, best_slot
 
 
-def get_slot_type(hour=None):
-    """Returns 'A', 'B', or 'C' for the given hour, or None if not a text post slot."""
-    if hour is None:
-        hour = datetime.datetime.now().hour
-    return HOUR_TO_TYPE.get(hour)
+def is_text_post_hour(hour=None, now_wat=None):
+    """Returns True if current time is within posting window of a slot.
+    Pass hour to use legacy exact-match behaviour (e.g. for force_hour).
+    """
+    if hour is not None:
+        return hour in TEXT_POST_HOURS
+    should_post, _ = resolve_slot(now_wat=now_wat)
+    return should_post
+
+
+def get_slot_type(hour=None, now_wat=None):
+    """Returns 'A', 'B', or 'C' for the resolved slot, or None."""
+    if hour is not None:
+        return HOUR_TO_TYPE.get(hour)
+    _, slot_hour = resolve_slot(now_wat=now_wat)
+    if slot_hour is None:
+        return None
+    return HOUR_TO_TYPE.get(slot_hour)
 
 
 def get_next_fact_index(cache, preferred_categories=None):
