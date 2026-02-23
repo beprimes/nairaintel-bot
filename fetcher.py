@@ -895,6 +895,13 @@ def fetch_all_data(config):
         data.setdefault(k, v)
         data.setdefault(f"{k}_chg", None)
 
+    # Ensure 52-week NGX data survives the data.update() pull
+    ngx_now = data.get("ngx", cache["tier2"].get("ngx_index", 104520))
+    data.setdefault("ngx_52w_high",  ngx_now)
+    data.setdefault("ngx_52w_low",   ngx_now)
+    data.setdefault("ngx_52w_days",  1)
+    data.setdefault("ngx_52w_since", today_str())
+
     # ── African indices ───────────────────────────────────────────────────────
     print("[INFO] Fetching African indices...")
     data.update(fetch_african_indices())
@@ -923,6 +930,36 @@ def fetch_all_data(config):
     else:
         cache["tier2"]["ngx_movers_available"] = False
         increment_failure(cache, "ngx_movers")
+
+    # ── NGX 52-week high/low tracking ─────────────────────────────────────────
+    # Updated every run. Used to render the 52-week range bar in place of movers.
+    ngx_val = cache["tier2"].get("ngx_index", 104520)
+    ngx_hist = cache.get("ngx_52w", {})
+    # Store daily closes keyed by date string
+    ngx_hist[today_str()] = ngx_val
+    # Prune to last 365 days
+    cutoff = (datetime.datetime.now() - datetime.timedelta(days=365)).strftime("%Y-%m-%d")
+    ngx_hist = {d: v for d, v in ngx_hist.items() if d >= cutoff}
+    cache["ngx_52w"] = ngx_hist
+
+    if ngx_hist:
+        values = list(ngx_hist.values())
+        ngx_52w_high = max(values)
+        ngx_52w_low  = min(values)
+        ngx_52w_days = len(ngx_hist)
+        ngx_52w_since = min(ngx_hist.keys())
+    else:
+        ngx_52w_high = ngx_val
+        ngx_52w_low  = ngx_val
+        ngx_52w_days = 1
+        ngx_52w_since = today_str()
+
+    data["ngx_52w_high"]  = ngx_52w_high
+    data["ngx_52w_low"]   = ngx_52w_low
+    data["ngx_52w_days"]  = ngx_52w_days
+    data["ngx_52w_since"] = ngx_52w_since
+    print(f"[INFO] NGX 52w: low={ngx_52w_low:,} | now={ngx_val:,} | high={ngx_52w_high:,} "
+          f"(over {ngx_52w_days} days)")
 
     # ── Tier 2: Daily scrapes (08:00 only) ───────────────────────────────────
     if is_first_run_today:
