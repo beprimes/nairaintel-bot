@@ -2,8 +2,7 @@ name: NairaIntel Text Posts
 
 on:
   schedule:
-    # Every 2 hours UTC — text_main.py checks WAT hour and exits if not a slot
-    # WAT = UTC+1, so these cover all 8 daily text slots:
+    # WAT = UTC+1. Crons run in UTC. text_main.py reads UTC+1 explicitly.
     # 06 WAT = 05 UTC  |  09 WAT = 08 UTC  |  11 WAT = 10 UTC  |  14 WAT = 13 UTC
     # 16 WAT = 15 UTC  |  18 WAT = 17 UTC  |  21 WAT = 20 UTC  |  23 WAT = 22 UTC
     - cron: '0 5 * * *'
@@ -56,25 +55,8 @@ jobs:
           X_ACCESS_TOKEN:        ${{ secrets.X_ACCESS_TOKEN }}
           X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
           DRY_RUN:               ${{ github.event.inputs.dry_run || 'false' }}
-          TZ:                    Africa/Lagos
-        run: |
-          if [ -n "${{ github.event.inputs.force_hour }}" ]; then
-            python -c "
-          import datetime, sys, os
-          # Monkey-patch datetime to force hour for testing
-          forced = int('${{ github.event.inputs.force_hour }}')
-          class FakeDatetime(datetime.datetime):
-              @classmethod
-              def now(cls, tz=None):
-                  real = super().now(tz)
-                  return real.replace(hour=forced)
-          datetime.datetime = FakeDatetime
-          import text_main
-          text_main.main()
-          "
-          else
-            python text_main.py
-          fi
+          FORCE_HOUR:            ${{ github.event.inputs.force_hour || '' }}
+        run: python text_main.py
 
       - name: Commit updated cache
         if: always()
@@ -82,7 +64,9 @@ jobs:
           git config user.name  "NairaIntel Bot"
           git config user.email "bot@nairaintel.auto"
           git add cache.json
-          git diff --staged --quiet || git commit -m "chore: update text post cache [skip ci]"
+          git diff --staged --quiet && echo "No cache changes" && exit 0
+          git commit -m "chore: update text post cache [skip ci]"
+          git pull --rebase origin main
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
