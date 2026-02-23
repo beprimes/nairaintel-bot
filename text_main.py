@@ -88,7 +88,9 @@ def build_live_data_from_cache(cache):
         "yr":             datetime.datetime.now(tz=WAT).year,
         "eur_ngn":        cache.get("last_eur_ngn", 1590),
         "gbp_ngn":        cache.get("last_gbp_ngn", 1820),
+        "cad_ngn":        cache.get("last_cad_ngn", 1010),
         "bnb_usd":        cache.get("last_bnb_usd", 600),
+        "sol_usd":        cache.get("last_sol_usd", 150),
         "diesel":         t2.get("diesel", 1450),
         "spread_ngn":     round(parallel - cache.get("last_cbn", 1346), 0),
     }
