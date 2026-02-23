@@ -1,8 +1,10 @@
 {
+  "yr_ago_rate": 1490,
+
   "prev_parallel_month": 1499,
   "prev_petrol_month": 897,
-  "prev_inflation_month": 33.2
-  "yr_ago_rate": 1490,
+  "prev_inflation_month": 33.2,
+
   "_notes": {
     "yr_ago_rate": "Feb 2025 USD/NGN parallel market rate \u2014 used for salary erosion tracker. Update each Feb.",
     "petrol_2023_baseline": "Pre-subsidy-removal petrol price May 2023 \u2014 used for tank_days_prev calc",
