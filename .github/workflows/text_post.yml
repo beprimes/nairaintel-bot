@@ -1,0 +1,88 @@
+name: NairaIntel Text Posts
+
+on:
+  schedule:
+    # Every 2 hours UTC — text_main.py checks WAT hour and exits if not a slot
+    # WAT = UTC+1, so these cover all 8 daily text slots:
+    # 06 WAT = 05 UTC  |  09 WAT = 08 UTC  |  11 WAT = 10 UTC  |  14 WAT = 13 UTC
+    # 16 WAT = 15 UTC  |  18 WAT = 17 UTC  |  21 WAT = 20 UTC  |  23 WAT = 22 UTC
+    - cron: '0 5 * * *'
+    - cron: '0 8 * * *'
+    - cron: '0 10 * * *'
+    - cron: '0 13 * * *'
+    - cron: '0 15 * * *'
+    - cron: '0 17 * * *'
+    - cron: '0 20 * * *'
+    - cron: '0 22 * * *'
+
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (build post but do not tweet)'
+        required: false
+        default: 'false'
+        type: boolean
+      force_hour:
+        description: 'Force a specific WAT hour (0-23) for testing'
+        required: false
+        default: ''
+        type: string
+
+jobs:
+  text_post:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run text poster
+        env:
+          X_API_KEY:             ${{ secrets.X_API_KEY }}
+          X_API_SECRET:          ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN:        ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+          DRY_RUN:               ${{ github.event.inputs.dry_run || 'false' }}
+          TZ:                    Africa/Lagos
+        run: |
+          if [ -n "${{ github.event.inputs.force_hour }}" ]; then
+            python -c "
+          import datetime, sys, os
+          # Monkey-patch datetime to force hour for testing
+          forced = int('${{ github.event.inputs.force_hour }}')
+          class FakeDatetime(datetime.datetime):
+              @classmethod
+              def now(cls, tz=None):
+                  real = super().now(tz)
+                  return real.replace(hour=forced)
+          datetime.datetime = FakeDatetime
+          import text_main
+          text_main.main()
+          "
+          else
+            python text_main.py
+          fi
+
+      - name: Commit updated cache
+        if: always()
+        run: |
+          git config user.name  "NairaIntel Bot"
+          git config user.email "bot@nairaintel.auto"
+          git add cache.json
+          git diff --staged --quiet || git commit -m "chore: update text post cache [skip ci]"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
