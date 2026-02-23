@@ -15,6 +15,11 @@ import json
 import os
 import sys
 
+# WAT = UTC+1. GitHub Actions runners are UTC.
+# We compute WAT explicitly rather than relying on TZ env var,
+# which Python's datetime.now() does not always pick up.
+WAT = datetime.timezone(datetime.timedelta(hours=1))
+
 
 def load_config():
     return {
@@ -81,13 +86,20 @@ def build_live_data_from_cache(cache):
         "btc_wk_hi":      wt.get("btc_week_high", 0),
         "btc_wk_lo":      wt.get("btc_week_low", 0),
         "salary_usd":     round(500000 / parallel) if parallel else 333,
-        "yr":             datetime.datetime.now().year,
+        "yr":             datetime.datetime.now(tz=WAT).year,
     }
 
 
 def main():
-    now_wat = datetime.datetime.now()   # TZ=Africa/Lagos set in workflow
-    hour    = now_wat.hour
+    now_wat = datetime.datetime.now(tz=WAT)
+
+    # FORCE_HOUR env var allows manual workflow_dispatch testing of specific slots
+    force_hour = os.environ.get("FORCE_HOUR", "").strip()
+    if force_hour and force_hour.isdigit():
+        hour = int(force_hour)
+        print(f"[INFO] FORCE_HOUR override: using hour {hour:02d}:00 WAT")
+    else:
+        hour = now_wat.hour
 
     print(f"\n{'='*55}")
     print(f"NairaIntel Text Bot — {now_wat.strftime('%Y-%m-%d %H:%M WAT')}")
