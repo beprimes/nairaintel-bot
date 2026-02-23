@@ -56,7 +56,10 @@ jobs:
           git config user.name  "NairaIntel Bot"
           git config user.email "bot@nairaintel.auto"
           git add cache.json
-          git diff --staged --quiet || git commit -m "chore: update cache [skip ci]"
+          git diff --staged --quiet && echo "No cache changes" && exit 0
+          git commit -m "chore: update cache [skip ci]"
+          # Pull with rebase in case text_post workflow committed first
+          git pull --rebase origin main
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
