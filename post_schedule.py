@@ -28,17 +28,23 @@ CACHE_FILE = os.path.join(os.path.dirname(__file__), "cache.json")
 # WAT hours that get text posts
 TEXT_POST_HOURS = [6, 9, 11, 14, 16, 18, 21, 23]
 
-# Which content type runs at each hour
+# Which content type runs at each hour.
+# Hours 6 and 23 rotate between their base type and Type D (rate snapshots).
+# Hour 21 is Type E (engagement questions).
+# Actual type resolved dynamically by get_slot_type() using cycle day.
 HOUR_TO_TYPE = {
-    6:  "A",
+    6:  "A",   # odd cycle days → D (rate snapshot), even → A (fact)
     9:  "B",
     11: "C",
     14: "A",
     16: "B",
     18: "C",
-    21: "A",
-    23: "B",
+    21: "E",   # engagement question every evening
+    23: "B",   # odd cycle days → D (rate snapshot), even → B (insight)
 }
+
+# Hours that alternate with Type D on odd cycle days
+RATE_SNAPSHOT_HOURS = {6, 23}
 
 # Which A-fact categories run at which slots (for variety)
 # 3 Type A slots per day — morning, afternoon, evening
@@ -137,14 +143,25 @@ def is_text_post_hour(hour=None, now_wat=None):
     return should_post
 
 
-def get_slot_type(hour=None, now_wat=None):
-    """Returns 'A', 'B', or 'C' for the resolved slot, or None."""
-    if hour is not None:
-        return HOUR_TO_TYPE.get(hour)
-    _, slot_hour = resolve_slot(now_wat=now_wat)
-    if slot_hour is None:
+def get_slot_type(hour=None, now_wat=None, cache=None):
+    """Returns 'A', 'B', 'C', 'D', or 'E' for the resolved slot, or None.
+
+    Hours in RATE_SNAPSHOT_HOURS alternate between base type and Type D:
+      - Odd cycle days  → Type D (rate snapshot)
+      - Even cycle days → base type (A or B)
+    """
+    if hour is None:
+        _, hour = resolve_slot(now_wat=now_wat)
+    if hour is None:
         return None
-    return HOUR_TO_TYPE.get(slot_hour)
+    base = HOUR_TO_TYPE.get(hour)
+    if base == "E":
+        return "E"
+    if hour in RATE_SNAPSHOT_HOURS:
+        cycle_day = get_cycle_day()
+        if cycle_day % 2 == 1:   # odd day → rate snapshot
+            return "D"
+    return base
 
 
 def get_next_fact_index(cache, preferred_categories=None):
