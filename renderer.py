@@ -114,7 +114,7 @@ def footer(draw, sources):
     draw.text((40, H-54), f"Sources: {sources}", font=fFt, fill="#506070")
     draw.text((40, H-35),
               "Posted 08:00 / 13:00 / 19:00 WAT  •  Not financial advice  •  "
-              "Cached data shows last-updated date  •  @AzaIndex",
+              "Cached data shows last-updated date  •  @NairaIntel",
               font=fFt, fill="#405060")
 
 def accent_bar(draw, color):
@@ -124,7 +124,7 @@ def page_header(draw, title, subtitle_tag, accent, post_time):
     draw.rectangle([(0, 0), (W, 5)], fill=accent)
     draw.text((40, 18), title, font=f(LS_B, 34), fill=WHITE)
     draw.text((40, 62), post_time, font=f(LS_R, 17), fill=LGRAY)
-    rt(draw, "@AzaIndex", f(LS_B, 16), W-40, 22, BLUE)
+    rt(draw, "@NairaIntel", f(LS_B, 16), W-40, 22, BLUE)
     rt(draw, subtitle_tag, f(LS_B, 13), W-40, 46, LGRAY)
     draw.line([(40, 94), (W-40, 94)], fill=BORDER, width=1)
 
