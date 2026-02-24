@@ -63,6 +63,10 @@
     "literacy_date": "2023",
     "avg_income_formal": 420000,
     "avg_income_date": "2025"
+    "rice_50kg": 72000,
+    "egg_crate": 6500,
+    "tomato_basket": 35000,
+    "bread_loaf": 1200
   },
   "weekly_tracking": {
     "usd_ngn_week_high": 1578.0,
