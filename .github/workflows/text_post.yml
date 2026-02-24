@@ -3,11 +3,13 @@ name: NairaIntel Text Posts
 on:
   schedule:
     # WAT = UTC+1. Crons run in UTC. text_main.py reads UTC+1 explicitly.
-    # 06 WAT = 05 UTC  |  09 WAT = 08 UTC  |  11 WAT = 10 UTC  |  14 WAT = 13 UTC
-    # 16 WAT = 15 UTC  |  18 WAT = 17 UTC  |  21 WAT = 20 UTC  |  23 WAT = 22 UTC
+    # 06 WAT = 05 UTC  |  09 WAT = 08 UTC  |  11 WAT = 10 UTC  |  12 WAT = 11 UTC
+    # 14 WAT = 13 UTC  |  16 WAT = 15 UTC  |  18 WAT = 17 UTC
+    # 21 WAT = 20 UTC  |  23 WAT = 22 UTC
     - cron: '0 5 * * *'
     - cron: '0 8 * * *'
     - cron: '0 10 * * *'
+    - cron: '0 11 * * *'   # 12:00 WAT — Type F (institutional engagement)
     - cron: '0 13 * * *'
     - cron: '0 15 * * *'
     - cron: '0 17 * * *'
