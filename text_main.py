@@ -93,6 +93,17 @@ def build_live_data_from_cache(cache):
         "sol_usd":        cache.get("last_sol_usd", 150),
         "diesel":         t2.get("diesel", 1450),
         "spread_ngn":     round(parallel - cache.get("last_cbn", 1346), 0),
+        # Food prices — updated manually in cache.json tier4 when prices change
+        # Same update pattern as inflation: change the value, commit cache.json
+        "rice_50kg":      t4.get("rice_50kg", 95000),
+        "tomato_basket":  t4.get("tomato_basket", 3000),
+        "egg_crate":      t4.get("egg_crate", 3200),
+        "bread_loaf":     t4.get("bread_loaf", 1200),
+        # Daily survival estimate = (rice per day + transport + misc)
+        # Derived: rice_50kg / 30 days + 2 bus rides + misc
+        "food_daily":     round(t4.get("rice_50kg", 95000) / 30 +
+                                t4.get("tomato_basket", 3000) / 15 +
+                                t4.get("bread_loaf", 1200) / 3, -2),
     }
 
 
