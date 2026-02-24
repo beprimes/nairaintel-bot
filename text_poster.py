@@ -800,7 +800,9 @@ def render_type_d(hour, live_data):
     sol      = d.get("sol_usd", 150)
     eur      = d.get("eur_ngn", 1590)
     gbp      = d.get("gbp_ngn", 1820)
-    cad      = d.get("cad_ngn", 1010)
+    # cad_ngn can be null in cache if scraper hasn't fetched it yet — use fallback
+    cad_raw  = d.get("cad_ngn")
+    cad      = cad_raw if cad_raw is not None else round(parallel * 0.72, 1)
 
     # USDT/USDC track parallel rate very closely on P2P
     usdt_ngn = round(parallel, 3)
@@ -822,13 +824,15 @@ def render_type_d(hour, live_data):
         )
     else:
         # FX snapshot (hour 23)
+        # Show ~ on CAD if it was estimated from parallel (cad_raw was None in cache)
+        cad_label = f"~\u20a6{cad:,.3f}*" if cad_raw is None else f"\u20a6{cad:,.3f}"
         post = (
             f"{ts}\n"
-            f"1 USD ⇛ ₦{parallel:,.3f}\n"
-            f"1 GBP ⇛ ₦{gbp:,.3f}\n"
-            f"1 EUR ⇛ ₦{eur:,.3f}\n"
-            f"1 CAD ⇛ ₦{cad:,.3f}\n"
-            f"CBN: ₦{cbn:,.3f}"
+            f"1 USD ⇛ \u20a6{parallel:,.3f}\n"
+            f"1 GBP ⇛ \u20a6{gbp:,.3f}\n"
+            f"1 EUR ⇛ \u20a6{eur:,.3f}\n"
+            f"1 CAD ⇛ {cad_label}\n"
+            f"CBN: \u20a6{cbn:,.3f}"
         )
 
     return post if len(post) <= 280 else _truncate(post)
@@ -941,20 +945,7 @@ TYPE_E_QUESTIONS = [
 
     "What financial goal are you working toward in 2026?\n\nA. Emergency fund (3–6 months)\nB. First investment\nC. Dollar savings\nD. Debt-free\nE. Property/land\nF. Survival — ask me again next year",
 
-    "Final question for the week: what's the one financial move you wish you'd made 5 years ago?\n\nDollar savings? Crypto? Property? Stocks?\n\n What was the missed opportunity?",
-    # ── Poverty line & minimum wage reality ───────────────────────────────────
-    "Nigeria's minimum wage is ₦70,000/month.\n\nIf you had to survive on exactly ₦70,000 in your city, what would you cut first?\n\nA. Feeding (cook everything at home)\nB. Transport (walk more)\nC. Data/airtime\nD. Any luxury — it's already survival mode",
-
-    "The World Bank poverty line is $2.15/day.\n\nAt today's rate that's roughly ₦3,300/day.\n\nBe honest — could you survive a full week on ₦3,300/day in your city?\n\nA. Impossible — that's one meal\nB. Very hard but possible in a small town\nC. I know people doing it right now\nD. I've done it myself",
-
-    "A 50L tank of petrol costs ₦44,850.\n\nNigeria's minimum wage is ₦70,000/month.\n\nFilling one tank costs 64% of minimum wage.\n\nFor truck drivers, keke riders, and delivery workers — how is this sustainable?\n\nA. It's not — they've raised prices\nB. They earn more than min wage\nC. They're running at a loss\nD. They've already cut back on trips",
-
-    "If Nigeria's minimum wage was set to cover actual Lagos survival costs (₦150,000–250,000/month), what would happen?\n\nA. Inflation — businesses pass cost on\nB. Mass unemployment — SMEs can't afford it\nC. Both A and B\nD. It's the right thing to do regardless",
-
-    "What is your actual monthly cost of living right now?\n\nA. Under ₦100,000\nB. ₦100,000–200,000\nC. ₦200,000–500,000\nD. ₦500,000+\nE. I honestly don't know — it keeps rising",
-
-    "Over 100 million Nigerians live on under $2.15/day.\n\nThat is roughly ₦3,300/day at today's rate.\n\nIs this mostly a data/measurement problem or does it reflect real conditions you see?\n\nA. Real — I see it every day\nB. Exaggerated by flawed data\nC. Both — it's complex\nD. I don't know anyone in that bracket",
-
+    "Final question for the week: what's the one financial move you wish you'd made 5 years ago?\n\nDollar savings? Crypto? Property? Stocks?\n\nWhat was the missed opportunity?",
 ]
 
 
