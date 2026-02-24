@@ -7,7 +7,8 @@
     "yr_ago_rate": "Feb 2025 USD/NGN parallel market rate - used for salary erosion tracker. Update each Feb.",
     "petrol_2023_baseline": "Pre-subsidy-removal petrol price May 2023 - used for tank_days_prev calc",
     "inflation": "Update manually each month when NBS publishes. Usually mid-month.",
-    "ngx_movers": "Set ngx_movers_available=false - scraper not yet live. Bot shows index only."
+    "ngx_movers": "Set ngx_movers_available=false - scraper not yet live. Bot shows index only.",
+    "food_prices": "Update rice_50kg, egg_crate, tomato_basket, bread_loaf manually when market prices shift significantly. Same workflow as inflation."
   },
   "tier2": {
     "ngx_index": 104520,
@@ -62,7 +63,7 @@
     "literacy_rate": 62.0,
     "literacy_date": "2023",
     "avg_income_formal": 420000,
-    "avg_income_date": "2025"
+    "avg_income_date": "2025",
     "rice_50kg": 72000,
     "egg_crate": 6500,
     "tomato_basket": 35000,
@@ -131,7 +132,7 @@
       "PiggyVest Safelock": 13.0,
       "Cowrywise": 14.5,
       "Carbon": 15.0,
-      "_source": "approximate \u2014 verify at bank",
+      "_source": "approximate — verify at bank",
       "_date": "2026-02-23"
     },
     "transfer_charges": {
@@ -182,7 +183,7 @@
         "type": "fixed",
         "min_days": 91
       },
-      "_source": "platform websites \u2014 verify before investing",
+      "_source": "platform websites — verify before investing",
       "_date": "2026-02-23",
       "_inflation": null
     }
