@@ -15,7 +15,6 @@ on:
     - cron: '0 17 * * *'
     - cron: '0 20 * * *'
     - cron: '0 22 * * *'
-
   workflow_dispatch:
     inputs:
       dry_run:
@@ -29,12 +28,18 @@ on:
         default: ''
         type: string
 
+# Prevents two runs writing cache.json at the same time.
+# If a scheduled run fires while the previous one is still running,
+# the new run queues and waits — it does NOT cancel the active run.
+concurrency:
+  group: text-post
+  cancel-in-progress: false
+
 jobs:
   text_post:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
