@@ -1053,6 +1053,23 @@ def build_text_post(hour, live_data, cache):
         text = render_type_e(cache)
         return (text if text and len(text) <= 280 else _truncate(text or "")), "E"
 
+    # ── Type F ────────────────────────────────────────────────────────────────
+    elif slot_type == "F":
+        from type_f_pool import render_type_f
+        from post_schedule import get_next_f_index, F_SLOT_CATEGORIES
+        preferred_cats = F_SLOT_CATEGORIES.get(hour, [])
+        f_idx = get_next_f_index(cache, preferred_cats)
+        text = render_type_f(f_idx, live_data)
+        if text and len(text) <= 280:
+            return text, "F"
+        # Too long — try next one (tags can add chars)
+        for _ in range(5):
+            f_idx = get_next_f_index(cache, preferred_cats)
+            text = render_type_f(f_idx, live_data)
+            if text and len(text) <= 280:
+                return text, "F"
+        return (_truncate(text) if text else None), "F"
+
     return None, None
 
 
@@ -1071,8 +1088,43 @@ def post_text_tweet(text, config):
         tweet_id = response.data["id"]
         print(f"[OK] Text tweet posted: https://x.com/i/web/status/{tweet_id}")
         return tweet_id
+
+    except tweepy.errors.Forbidden as e:
+        err_str = str(e).lower()
+        print(f"[ERROR] 403 Forbidden — X rejected the post.")
+        print(f"[ERROR] Raw error: {e}")
+        if "not permitted" in err_str or "authorization" in err_str:
+            print("[DIAGNOSIS] App permissions are likely set to Read-only.")
+            print("[FIX] developer.twitter.com → App → User auth settings → Read+Write")
+            print("[FIX] Then REGENERATE Access Token + Secret and update GitHub Secrets.")
+        elif "duplicate" in err_str:
+            print("[DIAGNOSIS] Duplicate content — too similar to a recent post.")
+            print("[FIX] Usually harmless. Rotation logic should prevent recurrence.")
+        else:
+            print("[DIAGNOSIS] Unknown 403. Check app status/billing in Developer Portal.")
+        raise
+
+    except tweepy.errors.TooManyRequests as e:
+        print(f"[ERROR] 429 Rate limit — too many requests.")
+        print(f"[ERROR] Raw error: {e}")
+        print("[DIAGNOSIS] Free tier allows 17 posts/24h. Check for duplicate workflow runs.")
+        raise
+
+    except tweepy.errors.Unauthorized as e:
+        print(f"[ERROR] 401 Unauthorized — credentials rejected.")
+        print(f"[ERROR] Raw error: {e}")
+        print("[FIX] Regenerate all 4 X credentials in Developer Portal and update Secrets.")
+        raise
+
+    except tweepy.errors.BadRequest as e:
+        print(f"[ERROR] 400 Bad Request — tweet content rejected.")
+        print(f"[ERROR] Raw error: {e}")
+        print(f"[DEBUG] Post was {len(text)} chars:
+{text}")
+        raise
+
     except Exception as e:
-        print(f"[ERROR] Text tweet failed: {e}")
+        print(f"[ERROR] Unexpected error: {type(e).__name__}: {e}")
         raise
 
 
