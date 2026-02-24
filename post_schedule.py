@@ -26,16 +26,18 @@ import os
 CACHE_FILE = os.path.join(os.path.dirname(__file__), "cache.json")
 
 # WAT hours that get text posts
-TEXT_POST_HOURS = [6, 9, 11, 14, 16, 18, 21, 23]
+TEXT_POST_HOURS = [6, 9, 11, 12, 14, 16, 18, 21, 23]
 
 # Which content type runs at each hour.
 # Hours 6 and 23 rotate between their base type and Type D (rate snapshots).
 # Hour 21 is Type E (engagement questions).
+# Hour 12 is Type F (institutional engagement posts).
 # Actual type resolved dynamically by get_slot_type() using cycle day.
 HOUR_TO_TYPE = {
     6:  "A",   # odd cycle days → D (rate snapshot), even → A (fact)
     9:  "B",
     11: "C",
+    12: "F",   # institutional engagement — CBN, NNPC, EFCC, DMO, media bait
     14: "A",
     16: "B",
     18: "C",
@@ -52,6 +54,14 @@ SLOT_CATEGORIES = {
     6:  ["devaluation", "history", "wages", "comparison", "fiscal"],
     14: ["fuel", "oil", "gdp", "debt", "trade", "agriculture"],
     21: ["engagement", "crypto", "fintech", "banking", "japa", "demographics"],
+}
+
+# Which F-fact categories prefer at which slots (for variety)
+# Can be extended if more F slots are added
+F_SLOT_CATEGORIES = {
+    12: ["cbn_policy", "nnpc_oil", "efcc_recovery", "dmo_debt",
+         "firs_revenue", "sec_markets", "media_amplifier",
+         "institutional", "praise_milestone"],
 }
 
 
@@ -155,8 +165,8 @@ def get_slot_type(hour=None, now_wat=None, cache=None):
     if hour is None:
         return None
     base = HOUR_TO_TYPE.get(hour)
-    if base == "E":
-        return "E"
+    if base in ("E", "F"):
+        return base
     if hour in RATE_SNAPSHOT_HOURS:
         cycle_day = get_cycle_day()
         if cycle_day % 2 == 1:   # odd day → rate snapshot
@@ -237,4 +247,37 @@ def get_type_c_template_index(cache, hour):
     used_c = cache.get("text_post_used_c", [])
     used_c.append(chosen)
     cache["text_post_used_c"] = used_c
+    return chosen
+
+
+def get_next_f_index(cache, preferred_categories=None):
+    """
+    Pick the next unused Type F fact index from the pool.
+    Avoids repeating posts within a 14-day window.
+    Prefers posts from preferred_categories if supplied.
+    """
+    from type_f_pool import TYPE_F_FACTS, get_type_f_by_category
+
+    used = set(cache.get("text_post_used_f", []))
+    total = len(TYPE_F_FACTS)
+
+    if preferred_categories:
+        candidates = []
+        for cat in preferred_categories:
+            candidates.extend(get_type_f_by_category(cat))
+        candidates = [i for i in candidates if i not in used]
+        if not candidates:
+            candidates = [i for i in range(total) if i not in used]
+    else:
+        candidates = [i for i in range(total) if i not in used]
+
+    # Full rotation reset
+    if not candidates:
+        cache["text_post_used_f"] = []
+        candidates = list(range(total))
+
+    chosen = candidates[0]
+    used_list = cache.get("text_post_used_f", [])
+    used_list.append(chosen)
+    cache["text_post_used_f"] = used_list
     return chosen
