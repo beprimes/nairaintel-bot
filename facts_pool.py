@@ -960,6 +960,113 @@ FACTS = [
         "category": "savings",
         "custom_calc": "inflation_half"
     },
+    # ── POVERTY LINE — WHAT ₦2.15/DAY ACTUALLY BUYS ──────────────────────────
+
+    {
+        "text": "The World Bank poverty line is $2.15/day.\n\nAt ₦{parallel}/$1 that is ₦{poverty_line_naira:.0f}/day.\n\nFor ₦{poverty_line_naira:.0f} in Lagos today:\n— Barely one sachet of water and half a loaf of bread.\n— Nothing left.\n\nOver 100 million Nigerians live within this line.\n\n🔴 NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "poverty",
+        "custom_calc": "poverty_line_naira"
+    },
+    {
+        "text": "The World Bank extreme poverty line: $2.15/day = ₦{poverty_line_naira:.0f}/day.\n\nNigeria's minimum wage: ₦70,000/month = ₦{min_wage_daily:.0f}/day.\n\nMinimum wage workers earn {min_wage_poverty_x:.1f}x the poverty line — but cannot survive Lagos on it.\n\nThe line is a floor, not a liveable wage.\n\n🔴 NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "poverty",
+        "custom_calc": "poverty_line_naira"
+    },
+    {
+        "text": "What ₦{poverty_line_naira:.0f} — the World Bank daily poverty line at today's rate — buys in Lagos:\n\n🥚 1-2 eggs\n🍞 Half a loaf of bread\n🚌 One short bus ride\n\nNothing else.\n\nOver 100 million Nigerians live at or below this line.\n\n🔴 NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "poverty",
+        "custom_calc": "poverty_line_naira"
+    },
+
+    # ── MINIMUM WAGE — DAYS OF WORK ───────────────────────────────────────────
+
+    {
+        "text": "Nigeria minimum wage: ₦70,000/month.\n\nBreaking that down:\n\n₦70,000 ÷ 22 working days = ₦{min_wage_daily:.0f}/day\n\nA 50L tank of petrol (₦{petrol_cost_50L:,}) costs {tank_days_wages:.1f} days of minimum wage.\n\nThe pump is not neutral. It is a tax on the poorest workers.\n\n⛽ NairaIntel",
+        "placeholders": ["petrol_cost_50L"],
+        "category": "wages",
+        "custom_calc": "min_wage_daily"
+    },
+    {
+        "text": "What a full month of Nigeria's minimum wage (₦70,000) buys in 2026:\n\n🛒 Rice 50kg bag: ₦{rice_50kg:,}\n\nThe minimum wage cannot buy a single bag of rice.\n\nIn 2019 when it was ₦18,000, a 50kg bag cost ₦18,000–22,000.\n\nThe wage and the price used to move together. Not anymore.\n\n🍚 NairaIntel",
+        "placeholders": ["rice_50kg"],
+        "category": "wages"
+    },
+    {
+        "text": "Min wage vs rent in Nigerian cities (2026):\n\nLagos 1-room (Mushin): ₦200k–350k/yr\nAbuja 1-bed (Lugbe): ₦400k–600k/yr\nPort Harcourt 1-bed: ₦250k–400k/yr\n\nMin wage annual: ₦840,000\n\nRent eats 25–70% of annual min wage before a kobo is spent on food.\n\n🏠 NairaIntel",
+        "placeholders": [],
+        "category": "wages"
+    },
+    {
+        "text": "₦70,000 minimum wage in dollar terms through history:\n\n2019 (₦360/$1): $194/month\n2022 (₦440/$1): $159/month\n2023 (₦750/$1): $93/month\n2024 (₦1,300/$1): $54/month\nToday (₦{parallel}/$1): ${min_wage_usd:.0f}/month\n\nSame naira number. The purchasing power keeps shrinking.\n\n💰 NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "wages",
+        "custom_calc": "min_wage_usd"
+    },
+    {
+        "text": "If Nigeria's minimum wage kept pace with inflation since 2019:\n\n2019: ₦30,000\nAdjusted for {inflation}% cumulative inflation: ~₦{inflation_adjusted_wage:,.0f}\n\nActual 2024 minimum wage: ₦70,000\n\nEven after the 2024 increase, real wages have not recovered.\n\n💰 NairaIntel",
+        "placeholders": ["inflation"],
+        "category": "wages",
+        "custom_calc": "inflation_adjusted_wage"
+    },
+
+    # ── DAILY SURVIVAL COST ──────────────────────────────────────────────────
+
+    {
+        "text": "Your daily ₦2,000 no longer cuts it.\n\nTo eat, move, and keep a phone on in Lagos today:\n\n🍚 Rice (1 day): ~₦{rice_daily:,.0f}\n🍅 Soup ingredients: ~₦500\n🚌 Transport (2 trips): ~₦600\n📱 Data: ~₦200\n\nMinimum daily survival: ~₦{food_daily:,.0f}\n\n₦2,000 covers less than half.\n\n🔴 NairaIntel",
+        "placeholders": ["rice_50kg"],
+        "category": "poverty",
+        "custom_calc": "food_daily"
+    },
+    {
+        "text": "What ₦5,000/day gets you in Lagos in 2026:\n\n🍚 Decent meals: ✅\n🚌 Transport: ✅\n📱 Data: ✅\n🏠 Rent contribution: ❌ (₦250k/yr = ₦685/day)\n💊 Any emergency: ❌\n\nAt {inflation}% inflation, ₦5,000/day is the new bare minimum — and most workers earn less.\n\n🔴 NairaIntel",
+        "placeholders": ["inflation"],
+        "category": "poverty"
+    },
+    {
+        "text": "The unofficial Lagos daily survival budget (single adult, 2026):\n\n🍚 Food: ₦{food_daily:,.0f}\n🚌 Transport: ₦600\n📱 Airtime/data: ₦200\n────────────────\nTotal: ~₦{survival_daily:,.0f}/day\n\nMonthly: ~₦{survival_monthly:,.0f}\n\nNigeria minimum wage: ₦70,000/month.\n\nThe math doesn't work.\n\n🔴 NairaIntel",
+        "placeholders": ["rice_50kg", "inflation"],
+        "category": "poverty",
+        "custom_calc": "food_daily"
+    },
+    {
+        "text": "Price of a 50kg bag of rice:\n\n2019: ₦18,000\n2021: ₦28,000\n2023: ₦45,000\n2024: ₦75,000\nToday: ₦{rice_50kg:,}\n\n$1 was ₦360 in 2019. Today it is ₦{parallel}.\n\nThe rice price and the exchange rate move as one.\n\n🍚 NairaIntel",
+        "placeholders": ["rice_50kg", "parallel"],
+        "category": "poverty"
+    },
+    {
+        "text": "Egg crate (30 eggs): ₦{egg_crate:,}\nBread (one loaf): ₦{bread_loaf:,}\nRice (1kg): ~₦{rice_per_kg:,}\n\n2019 equivalent costs:\nEggs: ₦900 | Bread: ₦350 | Rice/kg: ₦400\n\nIncome hasn't tripled. Prices have.\n\nInflation: {inflation}%\n\n🛒 NairaIntel",
+        "placeholders": ["egg_crate", "bread_loaf", "inflation"],
+        "category": "poverty",
+        "custom_calc": "rice_per_kg"
+    },
+
+    # ── GOVERNANCE ACCOUNTABILITY — moved from Type F ─────────────────────────
+
+    {
+        "text": "The CBN raised interest rates 9 times between 2022 and 2024 — from 11.5% to 27.5%.\n\nInflation today: {inflation}%\n\nMost of Nigeria\'s inflation is supply-side — food shocks, naira cost of imports, logistics.\n\nRate hikes reduce demand. They cannot grow tomatoes or fix roads.\n\n🏦 NairaIntel",
+        "placeholders": ["inflation"],
+        "category": "cbn"
+    },
+    {
+        "text": "Nigeria\'s debt service-to-revenue ratio was over 90% in 2023.\n\nFor every ₦100 the government earned, over ₦90 went to debt repayment.\n\nThat left less than ₦10 for roads, hospitals, schools, and salaries.\n\nAt {inflation}% inflation, the cost of refinancing stays high.\n\n💸 NairaIntel",
+        "placeholders": ["inflation"],
+        "category": "debt"
+    },
+    {
+        "text": "Illicit financial flows from Africa: estimated at $88B per year (African Union).\n\nNigeria accounts for a significant share.\n\nFor every dollar recovered by the EFCC, multiples leave through trade misinvoicing, capital flight, and offshore accounts.\n\n$1 = ₦{parallel} today.\n\n💸 NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "governance"
+    },
+    {
+        "text": "Corruption cost estimates for Nigeria: $18B–$32B per year.\n\nAt ₦{parallel}/$1 that is ₦{corruption_cost_ngn:.0f}–₦{corruption_cost_ngn_hi:.0f} trillion.\n\nNigeria\'s entire federal budget is ~₦35 trillion.\n\nThe leak is almost as large as the budget.\n\n⚖️ NairaIntel",
+        "placeholders": ["parallel"],
+        "category": "governance",
+        "custom_calc": "corruption_costs"
+    },
+
 ]
 
 
@@ -1015,6 +1122,13 @@ def render_fact(index, live_data):
     remittance_ngn  = round(20 * parallel / 1000, 1)       # $20B in trillions
     paystack_deval  = round(((parallel - 360) / 360) * 100, 1)
     poverty_line_naira = round(2.15 * parallel, 0)
+    min_wage_daily     = round(70000 / 22, 0)                          # ₦/working day
+    min_wage_poverty_x = round((70000 / 22) / (2.15 * parallel / parallel), 1)  # x poverty line per day — always same
+    min_wage_poverty_x = round(min_wage_daily / poverty_line_naira, 1)  # days wage vs poverty line naira
+    tank_days_wages    = round((50 * petrol) / (70000 / 22), 1)        # days of work to fill tank
+    inflation_adjusted_wage = round(30000 * (1 + 2.2), 0)              # 30k * ~3.2x cumulative since 2019
+    corruption_cost_ngn    = round(18e9 * parallel / 1e12, 1)          # ₦ trillions
+    corruption_cost_ngn_hi = round(32e9 * parallel / 1e12, 1)
     rice_dollar_cost = round(((parallel - 360) / 360) * 100, 1)
     uk_salary_naira = round(3500 * parallel, 0)
     uk_multiplier   = round(uk_salary_naira / 300000, 1)
@@ -1025,6 +1139,16 @@ def render_fact(index, live_data):
     civil_servant_usd = round(150000 / parallel, 1) if parallel else 0
     inflation_half  = round(72 / inflation, 1) if inflation else 0
     lpg_per_kg      = live_data.get("lpg_kg", 1200)
+    rice_50kg       = live_data.get("rice_50kg", 95000)
+    tomato_basket   = live_data.get("tomato_basket", 3000)
+    egg_crate       = live_data.get("egg_crate", 3200)
+    bread_loaf      = live_data.get("bread_loaf", 1200)
+    food_daily_raw  = live_data.get("food_daily", round(rice_50kg/30 + tomato_basket/15 + bread_loaf/3, -2))
+    rice_daily      = round(rice_50kg / 30, -1)
+    rice_per_kg     = round(rice_50kg / 50, -1)
+    food_daily      = round(food_daily_raw, -2)
+    survival_daily  = round(food_daily + 600 + 200, -2)   # food + transport + data
+    survival_monthly = round(survival_daily * 30, -2)
 
     subs = {
         "parallel":            parallel,
@@ -1063,6 +1187,21 @@ def render_fact(index, live_data):
         "remit_500":           remit_500,
         "civil_servant_usd":   civil_servant_usd,
         "inflation_half":      inflation_half,
+        "rice_50kg":           rice_50kg,
+        "rice_daily":          rice_daily,
+        "rice_per_kg":         rice_per_kg,
+        "egg_crate":           egg_crate,
+        "bread_loaf":          bread_loaf,
+        "food_daily":          food_daily,
+        "survival_daily":      survival_daily,
+        "survival_monthly":    survival_monthly,
+        "min_wage_daily":      min_wage_daily,
+        "min_wage_poverty_x":  min_wage_poverty_x,
+        "tank_days_wages":     tank_days_wages,
+        "min_wage_usd":        min_wage_usd,
+        "inflation_adjusted_wage": inflation_adjusted_wage,
+        "corruption_cost_ngn":     corruption_cost_ngn,
+        "corruption_cost_ngn_hi":  corruption_cost_ngn_hi,
     }
 
     try:
