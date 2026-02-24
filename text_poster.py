@@ -941,7 +941,20 @@ TYPE_E_QUESTIONS = [
 
     "What financial goal are you working toward in 2026?\n\nA. Emergency fund (3–6 months)\nB. First investment\nC. Dollar savings\nD. Debt-free\nE. Property/land\nF. Survival — ask me again next year",
 
-    "Final question for the week: what's the one financial move you wish you'd made 5 years ago?\n\nDollar savings? Crypto? Property? Stocks?\n\nWhat was the missed opportunity?",
+    "Final question for the week: what's the one financial move you wish you'd made 5 years ago?\n\nDollar savings? Crypto? Property? Stocks?\n\n What was the missed opportunity?",
+    # ── Poverty line & minimum wage reality ───────────────────────────────────
+    "Nigeria's minimum wage is ₦70,000/month.\n\nIf you had to survive on exactly ₦70,000 in your city, what would you cut first?\n\nA. Feeding (cook everything at home)\nB. Transport (walk more)\nC. Data/airtime\nD. Any luxury — it's already survival mode",
+
+    "The World Bank poverty line is $2.15/day.\n\nAt today's rate that's roughly ₦3,300/day.\n\nBe honest — could you survive a full week on ₦3,300/day in your city?\n\nA. Impossible — that's one meal\nB. Very hard but possible in a small town\nC. I know people doing it right now\nD. I've done it myself",
+
+    "A 50L tank of petrol costs ₦44,850.\n\nNigeria's minimum wage is ₦70,000/month.\n\nFilling one tank costs 64% of minimum wage.\n\nFor truck drivers, keke riders, and delivery workers — how is this sustainable?\n\nA. It's not — they've raised prices\nB. They earn more than min wage\nC. They're running at a loss\nD. They've already cut back on trips",
+
+    "If Nigeria's minimum wage was set to cover actual Lagos survival costs (₦150,000–250,000/month), what would happen?\n\nA. Inflation — businesses pass cost on\nB. Mass unemployment — SMEs can't afford it\nC. Both A and B\nD. It's the right thing to do regardless",
+
+    "What is your actual monthly cost of living right now?\n\nA. Under ₦100,000\nB. ₦100,000–200,000\nC. ₦200,000–500,000\nD. ₦500,000+\nE. I honestly don't know — it keeps rising",
+
+    "Over 100 million Nigerians live on under $2.15/day.\n\nThat is roughly ₦3,300/day at today's rate.\n\nIs this mostly a data/measurement problem or does it reflect real conditions you see?\n\nA. Real — I see it every day\nB. Exaggerated by flawed data\nC. Both — it's complex\nD. I don't know anyone in that bracket",
+
 ]
 
 
@@ -1053,23 +1066,6 @@ def build_text_post(hour, live_data, cache):
         text = render_type_e(cache)
         return (text if text and len(text) <= 280 else _truncate(text or "")), "E"
 
-    # ── Type F ────────────────────────────────────────────────────────────────
-    elif slot_type == "F":
-        from type_f_pool import render_type_f
-        from post_schedule import get_next_f_index, F_SLOT_CATEGORIES
-        preferred_cats = F_SLOT_CATEGORIES.get(hour, [])
-        f_idx = get_next_f_index(cache, preferred_cats)
-        text = render_type_f(f_idx, live_data)
-        if text and len(text) <= 280:
-            return text, "F"
-        # Too long — try next one (tags can add chars)
-        for _ in range(5):
-            f_idx = get_next_f_index(cache, preferred_cats)
-            text = render_type_f(f_idx, live_data)
-            if text and len(text) <= 280:
-                return text, "F"
-        return (_truncate(text) if text else None), "F"
-
     return None, None
 
 
@@ -1088,43 +1084,8 @@ def post_text_tweet(text, config):
         tweet_id = response.data["id"]
         print(f"[OK] Text tweet posted: https://x.com/i/web/status/{tweet_id}")
         return tweet_id
-
-    except tweepy.errors.Forbidden as e:
-        err_str = str(e).lower()
-        print(f"[ERROR] 403 Forbidden — X rejected the post.")
-        print(f"[ERROR] Raw error: {e}")
-        if "not permitted" in err_str or "authorization" in err_str:
-            print("[DIAGNOSIS] App permissions are likely set to Read-only.")
-            print("[FIX] developer.twitter.com → App → User auth settings → Read+Write")
-            print("[FIX] Then REGENERATE Access Token + Secret and update GitHub Secrets.")
-        elif "duplicate" in err_str:
-            print("[DIAGNOSIS] Duplicate content — too similar to a recent post.")
-            print("[FIX] Usually harmless. Rotation logic should prevent recurrence.")
-        else:
-            print("[DIAGNOSIS] Unknown 403. Check app status/billing in Developer Portal.")
-        raise
-
-    except tweepy.errors.TooManyRequests as e:
-        print(f"[ERROR] 429 Rate limit — too many requests.")
-        print(f"[ERROR] Raw error: {e}")
-        print("[DIAGNOSIS] Free tier allows 17 posts/24h. Check for duplicate workflow runs.")
-        raise
-
-    except tweepy.errors.Unauthorized as e:
-        print(f"[ERROR] 401 Unauthorized — credentials rejected.")
-        print(f"[ERROR] Raw error: {e}")
-        print("[FIX] Regenerate all 4 X credentials in Developer Portal and update Secrets.")
-        raise
-
-    except tweepy.errors.BadRequest as e:
-        print(f"[ERROR] 400 Bad Request — tweet content rejected.")
-        print(f"[ERROR] Raw error: {e}")
-        print(f"[DEBUG] Post was {len(text)} chars:")
-        print(text)
-        raise
-
     except Exception as e:
-        print(f"[ERROR] Unexpected error: {type(e).__name__}: {e}")
+        print(f"[ERROR] Text tweet failed: {e}")
         raise
 
 
