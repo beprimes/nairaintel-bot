@@ -990,7 +990,7 @@ FACTS = [
         "custom_calc": "min_wage_daily"
     },
     {
-        "text": "What a full month of Nigeria's minimum wage (₦70,000) buys in 2026:\n\n🛒 Rice 50kg bag: ₦{rice_50kg:,}\n\nThe minimum wage cannot buy a single bag of rice.\n\nIn 2019 when it was ₦18,000, a 50kg bag cost ₦18,000–22,000.\n\nThe wage and the price used to move together. Not anymore.\n\n🍚 NairaIntel",
+        "text": "Nigeria minimum wage: ₦70,000/month.\n\n🛒 50kg bag of rice today: ₦{rice_50kg:,}\n\nThat is {rice_wage_pct:.0f}% of a full month's salary — for one bag of rice.\n\n2019: bag cost ₦18–22k. Wage was ₦18k.\nThey used to move together. They stopped.\n\n🍚 NairaIntel",
         "placeholders": ["rice_50kg"],
         "category": "wages"
     },
@@ -1146,6 +1146,7 @@ def render_fact(index, live_data):
     food_daily_raw  = live_data.get("food_daily", round(rice_50kg/30 + tomato_basket/15 + bread_loaf/3, -2))
     rice_daily      = round(rice_50kg / 30, -1)
     rice_per_kg     = round(rice_50kg / 50, -1)
+    rice_wage_pct   = round(rice_50kg / 70000 * 100, 0)
     food_daily      = round(food_daily_raw, -2)
     survival_daily  = round(food_daily + 600 + 200, -2)   # food + transport + data
     survival_monthly = round(survival_daily * 30, -2)
@@ -1190,6 +1191,7 @@ def render_fact(index, live_data):
         "rice_50kg":           rice_50kg,
         "rice_daily":          rice_daily,
         "rice_per_kg":         rice_per_kg,
+        "rice_wage_pct":       rice_wage_pct,
         "egg_crate":           egg_crate,
         "bread_loaf":          bread_loaf,
         "food_daily":          food_daily,
