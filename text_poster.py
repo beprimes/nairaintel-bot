@@ -1119,8 +1119,8 @@ def post_text_tweet(text, config):
     except tweepy.errors.BadRequest as e:
         print(f"[ERROR] 400 Bad Request — tweet content rejected.")
         print(f"[ERROR] Raw error: {e}")
-        print(f"[DEBUG] Post was {len(text)} chars:
-{text}")
+        print(f"[DEBUG] Post was {len(text)} chars:")
+        print(text)
         raise
 
     except Exception as e:
