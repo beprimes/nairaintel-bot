@@ -800,9 +800,7 @@ def render_type_d(hour, live_data):
     sol      = d.get("sol_usd", 150)
     eur      = d.get("eur_ngn", 1590)
     gbp      = d.get("gbp_ngn", 1820)
-    # cad_ngn can be null in cache if scraper hasn't fetched it yet — use fallback
-    cad_raw  = d.get("cad_ngn")
-    cad      = cad_raw if cad_raw is not None else round(parallel * 0.72, 1)
+    cad      = d.get("cad_ngn", 1010)
 
     # USDT/USDC track parallel rate very closely on P2P
     usdt_ngn = round(parallel, 3)
@@ -824,15 +822,13 @@ def render_type_d(hour, live_data):
         )
     else:
         # FX snapshot (hour 23)
-        # Show ~ on CAD if it was estimated from parallel (cad_raw was None in cache)
-        cad_label = f"~\u20a6{cad:,.3f}*" if cad_raw is None else f"\u20a6{cad:,.3f}"
         post = (
             f"{ts}\n"
-            f"1 USD ⇛ \u20a6{parallel:,.3f}\n"
-            f"1 GBP ⇛ \u20a6{gbp:,.3f}\n"
-            f"1 EUR ⇛ \u20a6{eur:,.3f}\n"
-            f"1 CAD ⇛ {cad_label}\n"
-            f"CBN: \u20a6{cbn:,.3f}"
+            f"1 USD ⇛ ₦{parallel:,.3f}\n"
+            f"1 GBP ⇛ ₦{gbp:,.3f}\n"
+            f"1 EUR ⇛ ₦{eur:,.3f}\n"
+            f"1 CAD ⇛ ₦{cad:,.3f}\n"
+            f"CBN: ₦{cbn:,.3f}"
         )
 
     return post if len(post) <= 280 else _truncate(post)
@@ -1071,7 +1067,7 @@ def post_text_tweet(text, config):
             access_token=config["X_ACCESS_TOKEN"],
             access_token_secret=config["X_ACCESS_TOKEN_SECRET"]
         )
-        response = client.create_tweet(text=text)
+        response = client.create_tweet(text=text, user_auth=True)
         tweet_id = response.data["id"]
         print(f"[OK] Text tweet posted: https://x.com/i/web/status/{tweet_id}")
         return tweet_id
