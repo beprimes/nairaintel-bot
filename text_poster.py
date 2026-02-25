@@ -1067,18 +1067,12 @@ def post_text_tweet(text, config):
             access_token=config["X_ACCESS_TOKEN"],
             access_token_secret=config["X_ACCESS_TOKEN_SECRET"]
         )
-        response = client.create_tweet(text=text)
+        response = client.create_tweet(text=text, user_auth=True)
         tweet_id = response.data["id"]
         print(f"[OK] Text tweet posted: https://x.com/i/web/status/{tweet_id}")
         return tweet_id
-    except tweepy.errors.Forbidden as e:
-        print(f"[ERROR] Text tweet failed: 403 Forbidden")
-        print(f"[ERROR] API response: {e.response.text if hasattr(e, 'response') and e.response is not None else 'no response body'}")
-        print(f"[ERROR] API status: {e.api_codes if hasattr(e, 'api_codes') else 'no api code'}")
-        print(f"[ERROR] API errors: {e.api_errors if hasattr(e, 'api_errors') else 'no api errors'}")
-        raise
     except Exception as e:
-        print(f"[ERROR] Text tweet failed: {type(e).__name__}: {e}")
+        print(f"[ERROR] Text tweet failed: {e}")
         raise
 
 
