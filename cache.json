@@ -138,7 +138,7 @@
       "PiggyVest Safelock": 13.0,
       "Cowrywise": 14.5,
       "Carbon": 15.0,
-      "_source": "approximate — verify at bank",
+      "_source": "approximate \u2014 verify at bank",
       "_date": "2026-02-23"
     },
     "transfer_charges": {
@@ -189,7 +189,7 @@
         "type": "fixed",
         "min_days": 91
       },
-      "_source": "platform websites — verify before investing",
+      "_source": "platform websites \u2014 verify before investing",
       "_date": "2026-02-23",
       "_inflation": null
     }
