@@ -113,10 +113,6 @@ def post_to_x(images, caption, config):
         print(f"[OK] Tweet posted: https://x.com/i/web/status/{tweet_id}")
         return tweet_id
 
-    except tweepy.errors.Forbidden as e:
-        print(f"[ERROR] Posting failed: 403 Forbidden")
-        print(f"[ERROR] Detail: {e.response.text if hasattr(e, 'response') and e.response else str(e)}")
-        raise
     except Exception as e:
-        print(f"[ERROR] Failed to post tweet: {type(e).__name__}: {e}")
+        print(f"[ERROR] Failed to post tweet: {e}")
         raise
