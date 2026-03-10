@@ -11,8 +11,8 @@
     "food_prices": "Update rice_50kg, egg_crate, tomato_basket, bread_loaf manually when market prices shift significantly. Same workflow as inflation."
   },
   "tier2": {
-    "ngx_index": 104520,
-    "ngx_change": 0.6,
+    "ngx_index": 197197,
+    "ngx_change": 0.12,
     "ngx_movers": [
       {
         "name": "CONTENT",
@@ -27,15 +27,15 @@
         "change": 0.62
       }
     ],
-    "ngx_movers_date": "2026-02-22",
+    "ngx_movers_date": "2026-03-09",
     "ngx_movers_available": false,
-    "petrol": 897,
-    "diesel": 1771,
+    "petrol": 1300,
+    "diesel": 1620,
     "lpg_kg": 1200,
     "kerosene": 950,
-    "fuel_date": "2026-02-22",
-    "reserves": 34.2,
-    "reserves_date": "2026-02-14"
+    "fuel_date": "2026-03-10",
+    "reserves": 50.45,
+    "reserves_date": "2026-02-16"
   },
   "tier3": {
     "dangote_output": 350,
@@ -46,9 +46,9 @@
     "oil_production_date": "2026-02-10"
   },
   "tier4": {
-    "inflation": 33.2,
+    "inflation": 15.1,
     "inflation_date": "Jan 2026",
-    "inflation_source": "NBS",
+    "inflation_source": "NBS (rebased CPI, base 2024=100)",
     "petrol_2023_baseline": 200,
     "external_debt": 42.3,
     "external_debt_date": "Jan 2026",
@@ -118,8 +118,8 @@
   ],
   "scrape_failures": {
     "ngx_movers": 52,
-    "fuel": 16,
-    "reserves": 20,
+    "fuel": 0,
+    "reserves": 0,
     "inflation": 0,
     "dangote": 0,
     "oil_production": 0
@@ -143,7 +143,7 @@
   "last_egp_ngn": 26.451,
   "last_xof_ngn": 2.466,
   "last_gold_usd": 2930.0,
-  "last_brent": 75.0,
+  "last_brent": 84.0,
   "last_updated": "2026-03-10T14:13:34.193554",
   "ngx_52w": {
     "2026-02-23": 104520,
@@ -153,15 +153,15 @@
     "2026-02-27": 104520,
     "2026-02-28": 104520,
     "2026-03-01": 104520,
-    "2026-03-02": 104520,
-    "2026-03-03": 104520,
-    "2026-03-04": 104520,
-    "2026-03-05": 104520,
-    "2026-03-06": 104520,
-    "2026-03-07": 104520,
-    "2026-03-08": 104520,
-    "2026-03-09": 104520,
-    "2026-03-10": 104520
+    "2026-03-02": 195514,
+    "2026-03-03": 195514,
+    "2026-03-04": 195514,
+    "2026-03-05": 195514,
+    "2026-03-06": 196968,
+    "2026-03-07": 196968,
+    "2026-03-08": 196968,
+    "2026-03-09": 197197,
+    "2026-03-10": 197197
   },
   "type_c_data": {
     "savings_rates": {
