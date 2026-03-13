@@ -71,7 +71,7 @@
   },
   "weekly_tracking": {
     "usd_ngn_week_high": 1541.0,
-    "usd_ngn_week_low": 1508.0,
+    "usd_ngn_week_low": 1502.0,
     "btc_week_high": 72743,
     "btc_week_low": 67408,
     "week_start": "2026-03-09"
@@ -123,7 +123,7 @@
     "Mar-13"
   ],
   "scrape_failures": {
-    "ngx_movers": 61,
+    "ngx_movers": 62,
     "fuel": 3,
     "reserves": 3,
     "inflation": 0,
@@ -135,10 +135,10 @@
   "prev_zar_ngn": 83.121,
   "prev_egp_ngn": 26.529,
   "prev_xof_ngn": 2.444,
-  "last_btc_usd": 72743,
-  "last_eth_usd": 2147.7,
-  "last_bnb_usd": 671.36,
-  "last_parallel": 1508.0,
+  "last_btc_usd": 71019,
+  "last_eth_usd": 2097.76,
+  "last_bnb_usd": 655.38,
+  "last_parallel": 1502.0,
   "last_cbn": 1390.24,
   "last_eur_ngn": 1602.946,
   "last_gbp_ngn": 1857.362,
@@ -150,7 +150,7 @@
   "last_xof_ngn": 2.444,
   "last_gold_usd": 2930.0,
   "last_brent": 84.0,
-  "last_updated": "2026-03-13T14:11:22.299453",
+  "last_updated": "2026-03-13T19:27:52.809517",
   "ngx_52w": {
     "2026-02-23": 104520,
     "2026-02-24": 104520,
@@ -261,7 +261,7 @@
   "last_posted_2026-02-23_21": "2025999069940781242",
   "last_posted_2026-02-23_23": "2026061931711279310",
   "last_posted_2026-02-24_06": "2026174279297958125",
-  "last_sol_usd": 91.15,
+  "last_sol_usd": 88.59,
   "last_cad_ngn": null,
   "text_post_used_b": [
     1,
