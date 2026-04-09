@@ -141,7 +141,7 @@
     "Apr-9"
   ],
   "scrape_failures": {
-    "ngx_movers": 141,
+    "ngx_movers": 142,
     "fuel": 18,
     "reserves": 18,
     "inflation": 0,
@@ -153,9 +153,9 @@
   "prev_zar_ngn": 83.646,
   "prev_egp_ngn": 25.726,
   "prev_xof_ngn": 2.442,
-  "last_btc_usd": 70910,
-  "last_eth_usd": 2177.12,
-  "last_bnb_usd": 599.53,
+  "last_btc_usd": 70759,
+  "last_eth_usd": 2163.75,
+  "last_bnb_usd": 600.73,
   "last_parallel": 1508.0,
   "last_cbn": 1371.73,
   "last_eur_ngn": 1601.736,
@@ -168,7 +168,7 @@
   "last_xof_ngn": 2.442,
   "last_gold_usd": 2930.0,
   "last_brent": 84.0,
-  "last_updated": "2026-04-09T09:18:32.265659",
+  "last_updated": "2026-04-09T14:55:24.734630",
   "ngx_52w": {
     "2026-02-23": 104520,
     "2026-02-24": 104520,
@@ -319,7 +319,7 @@
   "last_posted_2026-02-23_21": "2025999069940781242",
   "last_posted_2026-02-23_23": "2026061931711279310",
   "last_posted_2026-02-24_06": "2026174279297958125",
-  "last_sol_usd": 82.17,
+  "last_sol_usd": 81.77,
   "last_cad_ngn": null,
   "text_post_used_b": [
     1,
