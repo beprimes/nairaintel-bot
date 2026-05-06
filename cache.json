@@ -72,14 +72,13 @@
   "weekly_tracking": {
     "usd_ngn_week_high": 1541.0,
     "usd_ngn_week_low": 1400.0,
-    "btc_week_high": 81482,
+    "btc_week_high": 81807,
     "btc_week_low": 65771,
     "week_start": "2026-03-09"
   },
   "aza_history": [
     32,
     32,
-    32,
     44,
     44,
     44,
@@ -106,10 +105,10 @@
     56,
     44,
     44,
-    44
+    44,
+    32
   ],
   "aza_dates": [
-    "Apr-6",
     "Apr-7",
     "Apr-8",
     "Apr-9",
@@ -138,37 +137,38 @@
     "May-2",
     "May-3",
     "May-4",
-    "May-5"
+    "May-5",
+    "May-6"
   ],
   "scrape_failures": {
-    "ngx_movers": 220,
+    "ngx_movers": 221,
     "fuel": 20,
     "reserves": 20,
     "inflation": 0,
     "dangote": 0,
     "oil_production": 0
   },
-  "prev_kes_ngn": 10.608,
-  "prev_ghs_ngn": 121.968,
-  "prev_zar_ngn": 81.737,
-  "prev_egp_ngn": 25.588,
-  "prev_xof_ngn": 2.443,
-  "last_btc_usd": 81482,
-  "last_eth_usd": 2371.47,
-  "last_bnb_usd": 630.46,
-  "last_parallel": 1400.0,
-  "last_cbn": 1369.75,
-  "last_eur_ngn": 1602.237,
-  "last_gbp_ngn": 1854.777,
-  "last_cny_ngn": 200.268,
-  "last_kes_ngn": 10.608,
-  "last_ghs_ngn": 121.968,
-  "last_zar_ngn": 81.737,
-  "last_egp_ngn": 25.588,
-  "last_xof_ngn": 2.443,
+  "prev_kes_ngn": 10.575,
+  "prev_ghs_ngn": 121.694,
+  "prev_zar_ngn": 82.138,
+  "prev_egp_ngn": 25.444,
+  "prev_xof_ngn": 2.438,
+  "last_btc_usd": 81807,
+  "last_eth_usd": 2390.92,
+  "last_bnb_usd": 644.16,
+  "last_parallel": 1503.0,
+  "last_cbn": 1366.12,
+  "last_eur_ngn": 1599.111,
+  "last_gbp_ngn": 1851.865,
+  "last_cny_ngn": 199.728,
+  "last_kes_ngn": 10.575,
+  "last_ghs_ngn": 121.694,
+  "last_zar_ngn": 82.138,
+  "last_egp_ngn": 25.444,
+  "last_xof_ngn": 2.438,
   "last_gold_usd": 2930.0,
   "last_brent": 84.0,
-  "last_updated": "2026-05-05T20:03:08.932726",
+  "last_updated": "2026-05-06T10:20:39.901511",
   "ngx_52w": {
     "2026-02-23": 104520,
     "2026-02-24": 104520,
@@ -241,7 +241,8 @@
     "2026-05-02": 197197,
     "2026-05-03": 197197,
     "2026-05-04": 197197,
-    "2026-05-05": 197197
+    "2026-05-05": 197197,
+    "2026-05-06": 197197
   },
   "type_c_data": {
     "savings_rates": {
@@ -348,7 +349,7 @@
   "last_posted_2026-02-23_21": "2025999069940781242",
   "last_posted_2026-02-23_23": "2026061931711279310",
   "last_posted_2026-02-24_06": "2026174279297958125",
-  "last_sol_usd": 85.88,
+  "last_sol_usd": 88.8,
   "last_cad_ngn": null,
   "text_post_used_b": [
     1,
