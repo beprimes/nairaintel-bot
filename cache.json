@@ -77,7 +77,6 @@
     "week_start": "2026-03-09"
   },
   "aza_history": [
-    32,
     44,
     44,
     44,
@@ -106,10 +105,10 @@
     44,
     44,
     32,
+    44,
     44
   ],
   "aza_dates": [
-    "Apr-8",
     "Apr-9",
     "Apr-10",
     "Apr-11",
@@ -138,37 +137,38 @@
     "May-4",
     "May-5",
     "May-6",
-    "May-7"
+    "May-7",
+    "May-8"
   ],
   "scrape_failures": {
-    "ngx_movers": 226,
+    "ngx_movers": 227,
     "fuel": 20,
     "reserves": 20,
     "inflation": 0,
     "dangote": 0,
     "oil_production": 0
   },
-  "prev_kes_ngn": 10.535,
-  "prev_ghs_ngn": 121.125,
-  "prev_zar_ngn": 82.989,
-  "prev_egp_ngn": 25.808,
-  "prev_xof_ngn": 2.438,
-  "last_btc_usd": 80005,
-  "last_eth_usd": 2292.42,
-  "last_bnb_usd": 642.28,
+  "prev_kes_ngn": 10.508,
+  "prev_ghs_ngn": 120.685,
+  "prev_zar_ngn": 82.844,
+  "prev_egp_ngn": 25.746,
+  "prev_xof_ngn": 2.43,
+  "last_btc_usd": 79727,
+  "last_eth_usd": 2281.31,
+  "last_bnb_usd": 636.33,
   "last_parallel": 1491.0,
-  "last_cbn": 1360.75,
-  "last_eur_ngn": 1598.997,
-  "last_gbp_ngn": 1850.6,
-  "last_cny_ngn": 199.383,
-  "last_kes_ngn": 10.535,
-  "last_ghs_ngn": 121.125,
-  "last_zar_ngn": 82.989,
-  "last_egp_ngn": 25.808,
-  "last_xof_ngn": 2.438,
+  "last_cbn": 1357.25,
+  "last_eur_ngn": 1594.141,
+  "last_gbp_ngn": 1844.593,
+  "last_cny_ngn": 199.13,
+  "last_kes_ngn": 10.508,
+  "last_ghs_ngn": 120.685,
+  "last_zar_ngn": 82.844,
+  "last_egp_ngn": 25.746,
+  "last_xof_ngn": 2.43,
   "last_gold_usd": 2930.0,
   "last_brent": 84.0,
-  "last_updated": "2026-05-07T20:24:15.683839",
+  "last_updated": "2026-05-08T09:19:33.208162",
   "ngx_52w": {
     "2026-02-23": 104520,
     "2026-02-24": 104520,
@@ -243,7 +243,8 @@
     "2026-05-04": 197197,
     "2026-05-05": 197197,
     "2026-05-06": 197197,
-    "2026-05-07": 197197
+    "2026-05-07": 197197,
+    "2026-05-08": 197197
   },
   "type_c_data": {
     "savings_rates": {
@@ -350,7 +351,7 @@
   "last_posted_2026-02-23_21": "2025999069940781242",
   "last_posted_2026-02-23_23": "2026061931711279310",
   "last_posted_2026-02-24_06": "2026174279297958125",
-  "last_sol_usd": 88.34,
+  "last_sol_usd": 88.2,
   "last_cad_ngn": null,
   "text_post_used_b": [
     1,
